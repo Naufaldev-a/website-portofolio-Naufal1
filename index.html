@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#030712">
     <title>Muhammad Naufal | Creative Developer — ULTIMATE</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +25,7 @@
             --radius: 24px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -33,6 +34,7 @@
             overflow-x: hidden;
             min-height: 100vh;
             position: relative;
+            -webkit-tap-highlight-color: transparent;
         }
 
         h1, h2, h3, .logo { font-family: 'Space Grotesk', sans-serif; }
@@ -45,7 +47,7 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.8s, visibility 0.8s;
         }
-        .loader-screen.hidden { opacity: 0; visibility: hidden; }
+        .loader-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .loader-logo {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 3rem; font-weight: 700; letter-spacing: -2px;
@@ -54,7 +56,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: gradientShift 2s linear infinite, glitchText 3s infinite;
+            animation: gradientShift 2s linear infinite;
         }
         @keyframes gradientShift { to { background-position: 200% center; } }
         .loader-bar {
@@ -71,6 +73,7 @@
         .loader-text {
             margin-top: 1rem; font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px;
+            text-align: center; padding: 0 1rem;
         }
         .loader-percent {
             font-family: 'JetBrains Mono', monospace;
@@ -81,90 +84,43 @@
         .aurora-blobs {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
             overflow: hidden;
+            will-change: transform;
         }
         .blob {
             position: absolute; border-radius: 50%;
             filter: blur(100px); opacity: 0.4;
             animation: floatBlob 20s ease-in-out infinite;
+            will-change: transform;
         }
         .blob-1 { width: 500px; height: 500px; background: var(--primary); top: -10%; left: -10%; }
         .blob-2 { width: 400px; height: 400px; background: var(--accent); top: 50%; right: -10%; animation-delay: -7s; }
         .blob-3 { width: 450px; height: 450px; background: #a855f7; bottom: -10%; left: 30%; animation-delay: -14s; }
         @keyframes floatBlob {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(100px, -50px) scale(1.1); }
-            66% { transform: translate(-80px, 80px) scale(0.9); }
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            33% { transform: translate3d(100px, -50px, 0) scale(1.1); }
+            66% { transform: translate3d(-80px, 80px, 0) scale(0.9); }
         }
 
-        /* ===== INTERACTIVE GRID ===== */
+        /* ===== INTERACTIVE GRID (desktop only via CSS) ===== */
         .interactive-grid {
             position: fixed; inset: 0; z-index: -1; pointer-events: none;
             background-image: 
                 linear-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(99, 102, 241, 0.08) 1px, transparent 1px);
             background-size: 50px 50px;
-            mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), black 0%, transparent 50%);
-            -webkit-mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), black 0%, transparent 50%);
-            transition: mask-size 0.3s;
+            display: none;
         }
 
-        /* ===== CINEMATIC NOISE ===== */
-        body::before {
-            content: ''; position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
-            opacity: 0.04; pointer-events: none; z-index: 1;
-            mix-blend-mode: overlay;
-        }
-
-        /* ===== CURSOR GLOW ===== */
-        .cursor-glow {
-            position: fixed; width: 600px; height: 600px;
-            border-radius: 50%; pointer-events: none; z-index: 2;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
-            transform: translate(-50%, -50%);
-            mix-blend-mode: screen;
-        }
-
-        .cursor-spotlight {
-            position: fixed; width: 200px; height: 200px;
-            border-radius: 50%; pointer-events: none; z-index: 2;
-            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 60%);
-            transform: translate(-50%, -50%);
-            mix-blend-mode: screen;
-        }
-
-        /* Particle trail canvas */
-        #trail-canvas {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 3; pointer-events: none;
+        /* ===== CURSOR ELEMENTS (hidden by default, shown on desktop) ===== */
+        .cursor-glow, .cursor-spotlight, .cursor-dot, .cursor-outline, #trail-canvas {
+            display: none;
         }
 
         #particle-canvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            z-index: 0; pointer-events: auto;
+            z-index: 0; pointer-events: none;
         }
-
-        /* ===== CUSTOM CURSOR ===== */
-        .cursor-dot, .cursor-outline {
-            position: fixed; top: 0; left: 0;
-            transform: translate(-50%, -50%);
-            border-radius: 50%; z-index: 9999;
-            pointer-events: none;
-        }
-        .cursor-dot { width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 20px var(--accent); transition: transform 0.15s, background 0.3s; }
-        .cursor-outline {
-            width: 40px; height: 40px;
-            border: 2px solid var(--primary);
-            transition: width 0.25s, height 0.25s, background 0.25s, border-color 0.25s;
-        }
-        body.hovering .cursor-outline {
-            width: 70px; height: 70px;
-            background: rgba(6, 182, 212, 0.15);
-            border-color: var(--accent);
-        }
-        body.hovering .cursor-dot { transform: translate(-50%, -50%) scale(0.3); background: #fff; }
 
         /* ===== SCROLL PROGRESS BAR ===== */
         .scroll-progress {
@@ -180,8 +136,9 @@
             position: fixed; top: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 5%; z-index: 100;
-            background: rgba(3, 7, 18, 0.7);
+            background: rgba(3, 7, 18, 0.85);
             backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
             border-bottom: 1px solid var(--border);
         }
 
@@ -204,14 +161,13 @@
         .nav-links li {
             position: relative; font-weight: 500; color: var(--text-muted);
             transition: 0.3s; font-size: 0.95rem; letter-spacing: 0.5px;
+            cursor: pointer;
         }
-        .nav-links li:hover, .nav-links li.active { color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
         .nav-links li::after {
             content: ''; position: absolute; bottom: -5px; left: 0;
             width: 0; height: 2px; background: var(--accent);
             transition: 0.3s ease; box-shadow: 0 0 10px var(--accent);
         }
-        .nav-links li:hover::after, .nav-links li.active::after { width: 100%; }
 
         /* Live Clock */
         .live-clock {
@@ -229,7 +185,36 @@
             box-shadow: 0 0 10px var(--accent);
         }
 
-        .menu-toggle { display: none; font-size: 1.5rem; color: #fff; }
+        .menu-toggle { 
+            display: none; font-size: 1.5rem; color: #fff; 
+            background: none; border: none; cursor: pointer;
+            padding: 8px;
+        }
+
+        /* ===== MOBILE NAV ===== */
+        .mobile-nav {
+            position: fixed; top: 80px; left: 0; right: 0;
+            background: rgba(3, 7, 18, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 5%;
+            z-index: 99;
+            transform: translateY(-150%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            list-style: none;
+            display: none;
+        }
+        .mobile-nav.open { transform: translateY(0); }
+        .mobile-nav li {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .mobile-nav li:last-child { border-bottom: none; }
+        .mobile-nav li.active { color: var(--accent); }
 
         /* ===== PAGE LAYOUT ===== */
         .page {
@@ -237,11 +222,11 @@
             padding: 120px 5% 60px; max-width: 1280px; margin: 0 auto;
             z-index: 5;
         }
-        .page.active { display: block; animation: pageReveal 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .page.active { display: block; animation: pageReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 
         @keyframes pageReveal {
-            from { opacity: 0; clip-path: circle(0% at 50% 50%); }
-            to { opacity: 1; clip-path: circle(150% at 50% 50%); }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .section-title {
@@ -256,20 +241,10 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: transparent;
-            filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4));
         }
 
-        /* ===== GLITCH TEXT ===== */
-        .glitch {
-            position: relative;
-            animation: glitchText 4s infinite;
-        }
-        @keyframes glitchText {
-            0%, 90%, 100% { text-shadow: none; }
-            92% { text-shadow: 2px 0 var(--primary), -2px 0 var(--accent); }
-            94% { text-shadow: -2px 0 var(--primary), 2px 0 var(--accent); }
-            96% { text-shadow: 2px 0 var(--accent), -2px 0 var(--primary); }
-        }
+        /* ===== GLITCH TEXT (base - no animation, added on desktop) ===== */
+        .glitch { position: relative; }
 
         /* ===== HERO ===== */
         .hero {
@@ -287,6 +262,7 @@
             background: #10b981;
             box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
             animation: pulse 2s infinite;
+            flex-shrink: 0;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
@@ -295,7 +271,7 @@
         }
 
         .hero-content h1 { 
-            font-size: clamp(2.8rem, 6vw, 5.2rem); line-height: 1.05; 
+            font-size: clamp(2.5rem, 6vw, 5.2rem); line-height: 1.05; 
             margin-bottom: 1.5rem; font-weight: 700;
         }
         
@@ -311,8 +287,9 @@
             font-size: 1.4rem; font-weight: 600; margin-bottom: 1.2rem;
             color: var(--text-main);
             opacity: 0; animation: fadeInUp 1s ease forwards; animation-delay: 0.8s;
+            min-height: 1.8em;
         }
-        .typing-line .role { color: var(--accent); text-shadow: 0 0 20px rgba(6, 182, 212, 0.5); }
+        .typing-line .role { color: var(--accent); }
         .typing-cursor {
             display: inline-block; width: 3px; height: 1.2em;
             background: var(--accent); vertical-align: middle;
@@ -333,7 +310,7 @@
 
         .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; opacity: 0; animation: fadeInUp 1s ease forwards; animation-delay: 1.2s; }
 
-        /* Magnetic button */
+        /* ===== BUTTONS ===== */
         .btn-glow {
             padding: 1rem 2.5rem; border-radius: 50px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -341,42 +318,37 @@
             box-shadow: 0 0 30px var(--glow), inset 0 0 20px rgba(255,255,255,0.1);
             transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.3s;
             position: relative; overflow: hidden;
-            display: inline-flex; align-items: center; gap: 10px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
             font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem;
             text-decoration: none;
+            cursor: pointer;
+            touch-action: manipulation;
         }
-        .btn-glow::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: 0.6s;
-        }
-        .btn-glow:hover::before { left: 100%; }
-        .btn-glow:hover { box-shadow: 0 10px 40px var(--glow); }
+        .btn-glow:active { transform: scale(0.97); }
 
         .btn-outline {
             padding: 1rem 2.5rem; border-radius: 50px;
             background: transparent; color: #fff;
             border: 1px solid var(--border);
-            transition: 0.3s; display: inline-flex; align-items: center; gap: 10px;
+            transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem;
             text-decoration: none;
+            cursor: pointer;
+            touch-action: manipulation;
         }
-        .btn-outline:hover { border-color: var(--accent); background: rgba(6, 182, 212, 0.1); }
+        .btn-outline:active { border-color: var(--accent); background: rgba(6, 182, 212, 0.1); transform: scale(0.97); }
 
         /* ===== HERO VISUAL ===== */
         .hero-visual {
             position: relative; width: 450px; height: 500px;
-            transform-style: preserve-3d;
-            transition: transform 0.2s ease-out;
             flex-shrink: 0;
         }
         
         .hero-img-wrapper {
             position: relative; width: 100%; height: 100%;
             border-radius: 30px; overflow: hidden;
-            transform: translateZ(50px);
             border: 1px solid var(--border);
             box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(99, 102, 241, 0.3);
         }
@@ -385,18 +357,18 @@
             background: linear-gradient(180deg, transparent 40%, rgba(3, 7, 18, 0.8) 100%);
             pointer-events: none;
         }
-        .hero-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
-        .hero-visual:hover .hero-img { transform: scale(1.05); }
+        .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
         .floating-badge {
             position: absolute; padding: 12px 20px;
             background: var(--card-bg); backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
             border: 1px solid var(--border); border-radius: 50px;
             display: flex; align-items: center; gap: 10px;
             font-weight: 600; font-size: 0.85rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transform: translateZ(80px);
             animation: floatBadge 4s ease-in-out infinite;
+            will-change: transform;
         }
         .floating-badge i { color: var(--accent); }
         .badge-1 { top: 10%; left: -30px; }
@@ -404,8 +376,8 @@
         .badge-3 { top: 45%; left: -50px; animation-delay: 2s; }
         
         @keyframes floatBadge {
-            0%, 100% { transform: translateZ(80px) translateY(0); }
-            50% { transform: translateZ(80px) translateY(-15px); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
         .hero-ring {
@@ -413,6 +385,7 @@
             border: 1px dashed rgba(99, 102, 241, 0.3);
             border-radius: 40px;
             animation: spin 30s linear infinite; z-index: -1;
+            will-change: transform;
         }
         .hero-ring::before {
             content: ''; position: absolute;
@@ -429,18 +402,14 @@
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
             padding: 1.5rem 0;
-            cursor: grab;
         }
-        .marquee.dragging { cursor: grabbing; }
-        .marquee-track { display: flex; gap: 3rem; animation: scroll 30s linear infinite; white-space: nowrap; }
+        .marquee-track { display: flex; gap: 3rem; animation: scroll 30s linear infinite; white-space: nowrap; will-change: transform; }
         .marquee.dragging .marquee-track { animation-play-state: paused; }
         .marquee-item {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 2rem; font-weight: 500;
             color: var(--text-muted); display: flex; align-items: center; gap: 3rem;
-            transition: color 0.3s;
         }
-        .marquee-item:hover { color: var(--accent); }
         .marquee-item span.dot {
             width: 10px; height: 10px; border-radius: 50%;
             background: var(--accent); box-shadow: 0 0 15px var(--accent);
@@ -457,37 +426,11 @@
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: var(--glass);
+            -webkit-backdrop-filter: var(--glass);
             border: 1px solid var(--border);
             border-radius: var(--radius); padding: 2rem;
-            transition: transform 0.2s ease-out, border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
             position: relative; overflow: hidden;
-            transform-style: preserve-3d;
-            will-change: transform;
-        }
-
-        /* Animated conic border */
-        .glass-card::before {
-            content: ''; position: absolute; inset: -2px;
-            border-radius: var(--radius);
-            background: conic-gradient(from 0deg, transparent, var(--primary), var(--accent), transparent);
-            opacity: 0; transition: opacity 0.4s;
-            z-index: -1;
-            animation: rotateBorder 3s linear infinite;
-        }
-        .glass-card:hover::before { opacity: 0.8; }
-        @keyframes rotateBorder { to { transform: rotate(360deg); } }
-
-        .glass-card:hover {
-            border-color: transparent;
-            box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.4);
-        }
-
-        .glass-card::after {
-            content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.15), transparent 60%);
-            opacity: var(--glare-opacity, 0);
-            transition: opacity 0.3s;
-            pointer-events: none;
         }
 
         /* ===== BIODATA ===== */
@@ -501,25 +444,18 @@
             border-radius: 24px;
             background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary), var(--accent), var(--primary));
             animation: rotateGradient 4s linear infinite;
+            max-width: 400px;
+            margin: 0 auto;
         }
         @keyframes rotateGradient {
             from { filter: hue-rotate(0deg); }
             to { filter: hue-rotate(360deg); }
         }
-        .bio-image-wrapper::before {
-            content: ''; position: absolute; inset: -2px;
-            border-radius: 24px;
-            background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
-            filter: blur(20px); opacity: 0.6; z-index: -1;
-            animation: rotateGradient 4s linear infinite;
-        }
         .bio-image {
             width: 100%; aspect-ratio: 3/4; object-fit: cover;
             border-radius: 21px; display: block;
-            filter: grayscale(20%) contrast(1.1);
             transition: 0.5s;
         }
-        .bio-image-wrapper:hover .bio-image { filter: grayscale(0%) contrast(1.15); transform: scale(1.02); }
 
         .status-badge {
             position: absolute; top: 20px; right: 20px;
@@ -539,13 +475,12 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 1rem 0; border-bottom: 1px solid var(--border);
             transition: 0.3s;
+            gap: 1rem;
         }
-        .info-row:hover { padding-left: 10px; background: rgba(99, 102, 241, 0.05); }
-        .info-row:hover .info-value { color: var(--accent); text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
         .info-row:last-child { border-bottom: none; }
-        .info-label { color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+        .info-label { color: var(--text-muted); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .info-label i { color: var(--primary); }
-        .info-value { font-weight: 600; transition: 0.3s; }
+        .info-value { font-weight: 600; transition: 0.3s; text-align: right; word-break: break-word; font-size: 0.9rem; }
 
         .skill-item { margin-bottom: 1.2rem; }
         .skill-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
@@ -571,9 +506,9 @@
             width: 100%; height: 220px; object-fit: cover;
             border-radius: 16px; margin-bottom: 1.5rem;
             border: 1px solid var(--border);
-            transition: 0.5s; filter: brightness(0.85);
+            transition: 0.5s;
+            display: block;
         }
-        .glass-card:hover .project-img { filter: brightness(1.1); transform: scale(1.03); }
 
         .tag {
             display: inline-block; padding: 5px 14px;
@@ -599,22 +534,6 @@
             width: 100%; transition: 0.3s;
         }
         .project-link i { transition: 0.3s; }
-        .project-link:hover { gap: 15px; text-shadow: 0 0 15px var(--accent); }
-        .project-link:hover i { transform: rotate(-45deg); }
-
-        /* Glitch hover effect on project cards */
-        .glitch-hover {
-            position: relative;
-        }
-        .glitch-hover:hover .project-img {
-            animation: glitchImg 0.4s;
-        }
-        @keyframes glitchImg {
-            0%, 100% { transform: scale(1.03); filter: brightness(1.1); }
-            20% { transform: scale(1.03) translateX(-3px); filter: brightness(1.3) hue-rotate(90deg); }
-            40% { transform: scale(1.03) translateX(3px); filter: brightness(0.9) hue-rotate(-90deg); }
-            60% { transform: scale(1.03) translateX(-2px); filter: brightness(1.2); }
-        }
 
         /* ===== CONTACT ===== */
         .contact-icon {
@@ -625,7 +544,6 @@
             box-shadow: 0 10px 30px var(--glow);
             transition: 0.4s;
         }
-        .glass-card:hover .contact-icon { transform: rotate(-10deg) scale(1.1); }
 
         footer {
             text-align: center; padding: 3rem 5%;
@@ -648,19 +566,296 @@
             margin-top: 1rem;
         }
 
-        @media (max-width: 900px) {
-            .hero { flex-direction: column-reverse; text-align: center; gap: 3rem; }
-            .hero-content h3 { justify-content: center; }
-            .typing-line { display: block; }
-            .hero-visual { width: 300px; height: 380px; }
+        /* ==========================================
+           🖥️ DESKTOP-ONLY STYLES (hover + fine pointer)
+           ========================================== */
+        @media (hover: hover) and (pointer: fine) {
+            * { cursor: none; }
+
+            /* Noise overlay - desktop only */
+            body::before {
+                content: ''; position: fixed; inset: 0;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+                opacity: 0.04; pointer-events: none; z-index: 1;
+                mix-blend-mode: overlay;
+            }
+
+            /* Interactive grid with mask */
+            .interactive-grid {
+                display: block;
+                mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), black 0%, transparent 50%);
+                -webkit-mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), black 0%, transparent 50%);
+            }
+
+            /* Cursor elements visible */
+            .cursor-glow {
+                position: fixed; width: 600px; height: 600px;
+                border-radius: 50%; pointer-events: none; z-index: 2;
+                background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+                transform: translate(-50%, -50%);
+                mix-blend-mode: screen;
+                display: block;
+                will-change: transform;
+            }
+            .cursor-spotlight {
+                position: fixed; width: 200px; height: 200px;
+                border-radius: 50%; pointer-events: none; z-index: 2;
+                background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 60%);
+                transform: translate(-50%, -50%);
+                mix-blend-mode: screen;
+                display: block;
+                will-change: transform;
+            }
+            .cursor-dot, .cursor-outline {
+                position: fixed; top: 0; left: 0;
+                transform: translate(-50%, -50%);
+                border-radius: 50%; z-index: 9999;
+                pointer-events: none;
+                display: block;
+            }
+            .cursor-dot { width: 8px; height: 8px; background: var(--accent); box-shadow: 0 0 20px var(--accent); transition: transform 0.15s, background 0.3s; }
+            .cursor-outline {
+                width: 40px; height: 40px;
+                border: 2px solid var(--primary);
+                transition: width 0.25s, height 0.25s, background 0.25s, border-color 0.25s;
+            }
+            body.hovering .cursor-outline {
+                width: 70px; height: 70px;
+                background: rgba(6, 182, 212, 0.15);
+                border-color: var(--accent);
+            }
+            body.hovering .cursor-dot { transform: translate(-50%, -50%) scale(0.3); background: #fff; }
+
+            #trail-canvas {
+                position: fixed; top: 0; left: 0;
+                width: 100%; height: 100%;
+                z-index: 3; pointer-events: none;
+                display: block;
+            }
+
+            /* Glitch text animation - desktop only */
+            .glitch { animation: glitchText 4s infinite; }
+            @keyframes glitchText {
+                0%, 90%, 100% { text-shadow: none; }
+                92% { text-shadow: 2px 0 var(--primary), -2px 0 var(--accent); }
+                94% { text-shadow: -2px 0 var(--primary), 2px 0 var(--accent); }
+                96% { text-shadow: 2px 0 var(--accent), -2px 0 var(--primary); }
+            }
+
+            .gradient-text { filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4)); }
+
+            /* Nav hover effects - desktop only */
+            .nav-links li:hover, .nav-links li.active { color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+            .nav-links li:hover::after, .nav-links li.active::after { width: 100%; }
+
+            /* Hero visual 3D */
+            .hero-visual {
+                transform-style: preserve-3d;
+                transition: transform 0.2s ease-out;
+            }
+            .hero-img-wrapper { transform: translateZ(50px); }
+            .hero-visual:hover .hero-img { transform: scale(1.05); transition: 0.6s ease; }
+
+            .floating-badge { transform: translateZ(80px); }
+            @keyframes floatBadgeDesktop {
+                0%, 100% { transform: translateZ(80px) translateY(0); }
+                50% { transform: translateZ(80px) translateY(-15px); }
+            }
+
+            /* Button hover effects - desktop only */
+            .btn-glow::before {
+                content: ''; position: absolute; top: 0; left: -100%;
+                width: 100%; height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: 0.6s;
+            }
+            .btn-glow:hover::before { left: 100%; }
+            .btn-glow:hover { box-shadow: 0 10px 40px var(--glow); }
+            .btn-outline:hover { border-color: var(--accent); background: rgba(6, 182, 212, 0.1); }
+
+            /* Marquee cursor */
+            .marquee { cursor: grab; }
+            .marquee.dragging { cursor: grabbing; }
+            .marquee-item:hover { color: var(--accent); }
+
+            /* Glass card 3D & animated border - desktop only */
+            .glass-card {
+                transform-style: preserve-3d;
+                will-change: transform;
+            }
+            .glass-card::before {
+                content: ''; position: absolute; inset: -2px;
+                border-radius: var(--radius);
+                background: conic-gradient(from 0deg, transparent, var(--primary), var(--accent), transparent);
+                opacity: 0; transition: opacity 0.4s;
+                z-index: -1;
+                animation: rotateBorder 3s linear infinite;
+            }
+            .glass-card:hover::before { opacity: 0.8; }
+            @keyframes rotateBorder { to { transform: rotate(360deg); } }
+            .glass-card:hover {
+                border-color: transparent;
+                box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.4);
+            }
+            .glass-card::after {
+                content: ''; position: absolute; inset: 0;
+                background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.15), transparent 60%);
+                opacity: var(--glare-opacity, 0);
+                transition: opacity 0.3s;
+                pointer-events: none;
+            }
+
+            /* Bio image hover */
+            .bio-image-wrapper::before {
+                content: ''; position: absolute; inset: -2px;
+                border-radius: 24px;
+                background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
+                filter: blur(20px); opacity: 0.6; z-index: -1;
+                animation: rotateGradient 4s linear infinite;
+            }
+            .bio-image { filter: grayscale(20%) contrast(1.1); }
+            .bio-image-wrapper:hover .bio-image { filter: grayscale(0%) contrast(1.15); transform: scale(1.02); }
+
+            /* Info row hover */
+            .info-row:hover { padding-left: 10px; background: rgba(99, 102, 241, 0.05); }
+            .info-row:hover .info-value { color: var(--accent); text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
+
+            /* Project image hover */
+            .project-img { filter: brightness(0.85); }
+            .glass-card:hover .project-img { filter: brightness(1.1); transform: scale(1.03); }
+
+            .project-link:hover { gap: 15px; text-shadow: 0 0 15px var(--accent); }
+            .project-link:hover i { transform: rotate(-45deg); }
+
+            .glitch-hover:hover .project-img {
+                animation: glitchImg 0.4s;
+            }
+            @keyframes glitchImg {
+                0%, 100% { transform: scale(1.03); filter: brightness(1.1); }
+                20% { transform: scale(1.03) translateX(-3px); filter: brightness(1.3) hue-rotate(90deg); }
+                40% { transform: scale(1.03) translateX(3px); filter: brightness(0.9) hue-rotate(-90deg); }
+                60% { transform: scale(1.03) translateX(-2px); filter: brightness(1.2); }
+            }
+
+            .glass-card:hover .contact-icon { transform: rotate(-10deg) scale(1.1); }
+        }
+
+        /* ==========================================
+           📱 MOBILE-ONLY STYLES (touch devices)
+           ========================================== */
+        @media (hover: none), (pointer: coarse), (max-width: 900px) {
+            /* Force native cursor on mobile */
+            * { cursor: auto !important; }
+
+            /* Hide heavy desktop elements */
+            .cursor-glow, .cursor-spotlight, .cursor-dot, .cursor-outline,
+            .interactive-grid, .hero-ring, #trail-canvas, #particle-canvas {
+                display: none !important;
+            }
+
+            /* No noise overlay */
+            body::before { display: none !important; }
+
+            /* Lighter blob blur */
+            .blob { filter: blur(60px); opacity: 0.3; }
+            .blob-1 { width: 350px; height: 350px; }
+            .blob-2 { width: 280px; height: 280px; }
+            .blob-3 { width: 320px; height: 320px; }
+
+            /* Show mobile nav */
+            .mobile-nav { display: block; }
             .nav-links { display: none; }
             .menu-toggle { display: block; }
             .live-clock { display: none; }
-            * { cursor: auto; }
-            .cursor-dot, .cursor-outline, .cursor-glow, .cursor-spotlight { display: none; }
-            .biodata-grid { grid-template-columns: 1fr; }
-            .marquee-item { font-size: 1.2rem; }
+
+            header { height: 60px; padding: 0 4%; }
+            .mobile-nav { top: 60px; }
+            .page { padding: 80px 4% 40px; }
+            .section-title { letter-spacing: -1px; }
+
+            /* Hero mobile layout */
+            .hero { 
+                flex-direction: column-reverse; 
+                text-align: center; 
+                gap: 2rem; 
+                min-height: auto; 
+                padding-top: 20px; 
+            }
+            .hero-content h3 { justify-content: center; font-size: 0.8rem; letter-spacing: 2px; }
+            .hero-content h1 { font-size: clamp(2rem, 8vw, 3rem); }
+            .hero-content p { margin-left: auto; margin-right: auto; }
+            .btn-group { justify-content: center; width: 100%; }
+            .btn-glow, .btn-outline { 
+                flex: 1; 
+                min-width: 140px; 
+                padding: 0.9rem 1.5rem; 
+                font-size: 0.9rem; 
+            }
+            .hero-visual { width: 280px; height: 320px; }
+            .hero-img-wrapper {
+                box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+            }
             .floating-badge { display: none; }
+
+            .typing-line { font-size: 1.1rem; }
+            .hero-content p { font-size: 1rem; }
+
+            /* Marquee smaller */
+            .marquee-item { font-size: 1.2rem; gap: 2rem; }
+            .marquee { padding: 1rem 0; margin-top: 2rem; }
+
+            /* Cards mobile */
+            .glass-card { padding: 1.2rem; }
+            .grid-container { 
+                grid-template-columns: 1fr; 
+                gap: 1.2rem; 
+                margin-top: 2rem;
+            }
+            .project-img { height: 180px; }
+
+            /* Biodata mobile */
+            .biodata-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .bio-image-wrapper { max-width: 280px; }
+            .bio-image { filter: grayscale(10%) contrast(1.05); }
+            .info-value { font-size: 0.8rem; }
+            .info-label { font-size: 0.8rem; }
+
+            /* Contact mobile */
+            .contact-icon {
+                width: 60px; height: 60px;
+                font-size: 1.5rem;
+            }
+
+            /* Loader mobile */
+            .loader-logo { font-size: 2.2rem; }
+            .loader-bar { width: 80vw; }
+            .loader-text { font-size: 0.7rem; letter-spacing: 1px; }
+
+            /* Prevent zoom on tap */
+            a, button { touch-action: manipulation; }
+
+            footer { font-size: 0.8rem; padding: 2rem 4%; }
+        }
+
+        /* Extra small mobile */
+        @media (max-width: 500px) {
+            .btn-group { flex-direction: column; }
+            .btn-glow, .btn-outline { width: 100%; }
+            .hero-visual { width: 240px; height: 280px; }
+        }
+
+        /* iOS safe area fix */
+        @supports (-webkit-touch-callout: none) {
+            body { min-height: -webkit-fill-available; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
@@ -681,7 +876,7 @@
         <div class="blob blob-3"></div>
     </div>
 
-    <!-- INTERACTIVE GRID -->
+    <!-- INTERACTIVE GRID (desktop only via CSS) -->
     <div class="interactive-grid" id="grid"></div>
 
     <div class="scroll-progress" id="scrollProgress"></div>
@@ -703,8 +898,16 @@
             <li onclick="navigate('contact', this)">Contact</li>
         </ul>
         <div class="live-clock" id="liveClock">--:--:--</div>
-        <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </header>
+
+    <!-- MOBILE NAV -->
+    <ul class="mobile-nav" id="mobileNav">
+        <li class="active" onclick="navigate('home', this); closeMobileNav()">Home</li>
+        <li onclick="navigate('biodata', this); closeMobileNav()">Biodata</li>
+        <li onclick="navigate('project', this); closeMobileNav()">Projects</li>
+        <li onclick="navigate('contact', this); closeMobileNav()">Contact</li>
+    </ul>
 
     <!-- HOME -->
     <div class="page active" id="page-home">
@@ -723,10 +926,10 @@
                 </div>
                 <p>Seorang <strong style="color:#fff">Web Developer & Designer</strong> yang menciptakan pengalaman digital sinematik dengan sentuhan teknologi modern dan estetika futuristik.</p>
                 <div class="btn-group">
-                    <button class="btn-glow hover-trigger magnetic" onclick="navigate('project', document.querySelectorAll('.nav-links li')[2])">
+                    <button class="btn-glow magnetic" onclick="navigate('project', document.querySelectorAll('.nav-links li')[2])">
                         Lihat Karya <i class="fas fa-arrow-right"></i>
                     </button>
-                    <button class="btn-outline hover-trigger magnetic" onclick="navigate('contact', document.querySelectorAll('.nav-links li')[3])">
+                    <button class="btn-outline magnetic" onclick="navigate('contact', document.querySelectorAll('.nav-links li')[3])">
                         Hubungi Saya
                     </button>
                 </div>
@@ -735,7 +938,7 @@
             <div class="hero-visual" id="heroVisual">
                 <div class="hero-ring"></div>
                 <div class="hero-img-wrapper">
-                    <img src="https://iili.io/C6W9jwv.md.png" alt="Naufal" class="hero-img">
+                    <img src="https://iili.io/C6W9jwv.md.png" alt="Naufal" class="hero-img" loading="eager">
                 </div>
                 <div class="floating-badge badge-1"><i class="fas fa-code"></i> Web Developer</div>
                 <div class="floating-badge badge-2"><i class="fas fa-star"></i> 4.9 Rating</div>
@@ -759,13 +962,13 @@
         </div>
         
         <div class="biodata-grid">
-            <div class="bio-image-wrapper hover-trigger" data-aos="fade-right">
+            <div class="bio-image-wrapper" data-aos="fade-right">
                 <span class="status-badge">ONLINE</span>
-                <img src="https://iili.io/C6W9jwv.md.png" alt="Naufal" class="bio-image">
+                <img src="https://iili.io/C6W9jwv.md.png" alt="Naufal" class="bio-image" loading="lazy">
             </div>
             
             <div data-aos="fade-left">
-                <div class="glass-card hover-trigger" style="margin-bottom:2rem;" data-tilt>
+                <div class="glass-card" style="margin-bottom:2rem;" data-tilt>
                     <h3 style="margin-bottom:1.5rem; font-size:1.5rem; display:flex; align-items:center; gap:10px;">
                         <i class="fas fa-user-astronaut" style="color:var(--accent)"></i> Personal Info
                     </h3>
@@ -787,7 +990,7 @@
                     </div>
                 </div>
 
-                <div class="glass-card hover-trigger" data-tilt>
+                <div class="glass-card" data-tilt>
                     <h3 style="margin-bottom:1.5rem; font-size:1.5rem; display:flex; align-items:center; gap:10px;">
                         <i class="fas fa-layer-group" style="color:var(--accent)"></i> Expertise
                     </h3>
@@ -824,48 +1027,48 @@
         </div>
 
         <div class="grid-container">
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 1">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 1" loading="lazy">
                 <span class="tag">Education</span>
                 <h3>English Learning App</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Platform belajar bahasa Inggris interaktif untuk anak-anak dengan UI yang menyenangkan.</p>
-                <a href="https://kidly-english-adventure.lovable.app" target="_blank" class="project-link">Visit Website <i class="fas fa-arrow-right"></i></a>
+                <a href="https://kidly-english-adventure.lovable.app" target="_blank" rel="noopener" class="project-link">Visit Website <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-aos-delay="100" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 2">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-aos-delay="100" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 2" loading="lazy">
                 <span class="tag">Science</span>
                 <h3>Fisika Trigonometri</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Visualisasi Sin, Cos, Tan dan generator frekuensi suara 0-20000Hz interaktif.</p>
                 <a href="websitetrigonometri.html" class="project-link">View Demo <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-aos-delay="200" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 3">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-aos-delay="200" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 3" loading="lazy">
                 <span class="tag">Business</span>
                 <h3>Company Profile</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Website korporat modern dengan performa tinggi dan SEO optimization.</p>
-                <a href="hacker.html" class="project-link">View Case Study <i class="fas fa-arrow-right"></i></a>
+                <a href="https://harmony-spectrum-suite.lovable.app" class="project-link">View Case Study <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 4">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 4" loading="lazy">
                 <span class="tag">Personal</span>
                 <h3>Portfolio Cinematic</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Website portofolio ini dengan particle interaktif, 3D tilt, dan efek sinematik.</p>
                 <a href="websitepiano.html" class="project-link">This Website <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-aos-delay="100" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 5">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-aos-delay="100" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 5" loading="lazy">
                 <span class="tag">Dashboard</span>
                 <h3>Admin Dashboard UI</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Antarmuka dashboard admin dengan dark mode, grafik, dan tabel manajemen.</p>
                 <a href="https://ohm-pal-studio.lovable.app" class="project-link">View <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="glass-card hover-trigger project-card glitch-hover" data-aos="fade-up" data-aos-delay="200" data-tilt>
-                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 6">
+            <div class="glass-card project-card glitch-hover" data-aos="fade-up" data-aos-delay="200" data-tilt>
+                <img src="https://iili.io/C6W9jwv.md.png" class="project-img" alt="Project 6" loading="lazy">
                 <span class="tag">Business</span>
                 <h3>UMKM Landing Page</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin:0.5rem 0;">Landing page untuk usaha lokal dengan konversi tinggi dan loading cepat.</p>
@@ -882,25 +1085,25 @@
         </div>
 
         <div class="grid-container" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-            <div class="glass-card hover-trigger" style="text-align:center;" data-aos="flip-left" data-tilt>
+            <div class="glass-card" style="text-align:center;" data-aos="fade-up" data-tilt>
                 <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
                 <h3>WhatsApp</h3>
                 <p style="color:var(--text-muted); margin:1rem 0 1.5rem;">+62 822 1889 7217</p>
                 <a href="https://wa.me/6282218897217" class="btn-glow magnetic" style="padding:0.7rem 1.5rem; font-size:0.9rem; width:100%; justify-content:center;">Chat Now</a>
             </div>
 
-            <div class="glass-card hover-trigger" style="text-align:center;" data-aos="flip-left" data-aos-delay="100" data-tilt>
+            <div class="glass-card" style="text-align:center;" data-aos="fade-up" data-aos-delay="100" data-tilt>
                 <div class="contact-icon"><i class="far fa-envelope"></i></div>
                 <h3>Email</h3>
                 <p style="color:var(--text-muted); margin:1rem 0 1.5rem; font-size:0.85rem;">muhammadnaufalpanggang1@gmail.com</p>
                 <a href="mailto:muhammadnaufalpanggang1@gmail.com" class="btn-glow magnetic" style="padding:0.7rem 1.5rem; font-size:0.9rem; width:100%; justify-content:center;">Send Mail</a>
             </div>
 
-            <div class="glass-card hover-trigger" style="text-align:center;" data-aos="flip-left" data-aos-delay="200" data-tilt>
+            <div class="glass-card" style="text-align:center;" data-aos="fade-up" data-aos-delay="200" data-tilt>
                 <div class="contact-icon"><i class="fab fa-instagram"></i></div>
                 <h3>Instagram</h3>
                 <p style="color:var(--text-muted); margin:1rem 0 1.5rem;">@nopallz.__</p>
-                <a href="https://instagram.com/nopallz.__" target="_blank" class="btn-glow magnetic" style="padding:0.7rem 1.5rem; font-size:0.9rem; width:100%; justify-content:center;">Follow</a>
+                <a href="https://instagram.com/nopallz.__" target="_blank" rel="noopener" class="btn-glow magnetic" style="padding:0.7rem 1.5rem; font-size:0.9rem; width:100%; justify-content:center;">Follow</a>
             </div>
         </div>
     </div>
@@ -912,7 +1115,20 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // ===== LOADING SCREEN =====
+        // ==========================================
+        // 🎯 DEVICE DETECTION - AKURAT
+        // ==========================================
+        const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+        const hasHover = window.matchMedia('(hover: hover)').matches;
+        const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isDesktop = hasFinePointer && hasHover && !isMobileUA;
+        const isMobile = !isDesktop;
+
+        console.log(`%c🎨 Naufal.DEV — ${isDesktop ? '🖥️ DESKTOP MODE (Full Cinematic)' : '📱 MOBILE MODE (Optimized)'}`, 'color:#06b6d4; font-size:14px; font-weight:bold;');
+
+        // ==========================================
+        // LOADING SCREEN
+        // ==========================================
         (function() {
             const loader = document.getElementById('loader');
             const percent = document.getElementById('loader-percent');
@@ -923,16 +1139,26 @@
                     p = 100;
                     percent.textContent = '100%';
                     clearInterval(interval);
-                    setTimeout(() => loader.classList.add('hidden'), 400);
+                    setTimeout(() => {
+                        loader.classList.add('hidden');
+                        setTimeout(() => loader.remove(), 800);
+                    }, 400);
                 } else {
                     percent.textContent = Math.floor(p) + '%';
                 }
             }, 80);
         })();
 
-        AOS.init({ duration: 800, once: true, offset: 50 });
+        AOS.init({ 
+            duration: isDesktop ? 800 : 600, 
+            once: true, 
+            offset: 50,
+            disable: isMobile
+        });
 
-        // ===== LIVE CLOCK =====
+        // ==========================================
+        // LIVE CLOCK (desktop only)
+        // ==========================================
         function updateClock() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
@@ -941,10 +1167,14 @@
             const el = document.getElementById('liveClock');
             if (el) el.textContent = `${h}:${m}:${s}`;
         }
-        updateClock();
-        setInterval(updateClock, 1000);
+        if (isDesktop) {
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
 
-        // ===== VISITOR COUNTER (simulated) =====
+        // ==========================================
+        // VISITOR COUNTER
+        // ==========================================
         (function() {
             const el = document.getElementById('visitorCount');
             if (!el) return;
@@ -966,22 +1196,54 @@
             update();
         })();
 
-        // ===== NAVIGATION WITH CLIP-PATH =====
+        // ==========================================
+        // MOBILE MENU
+        // ==========================================
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileNav = document.getElementById('mobileNav');
+        if (menuToggle && mobileNav) {
+            menuToggle.addEventListener('click', () => {
+                mobileNav.classList.toggle('open');
+                const icon = menuToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+        }
+        function closeMobileNav() {
+            if (mobileNav) mobileNav.classList.remove('open');
+            if (menuToggle) {
+                const icon = menuToggle.querySelector('i');
+                icon.classList.add('fa-bars');
+                icon.classList.remove('fa-times');
+            }
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
         function navigate(pageId, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
-            if (element) element.classList.add('active');
+            document.querySelectorAll('.mobile-nav li').forEach(li => li.classList.remove('active'));
+            if (element) {
+                element.classList.add('active');
+                const idx = Array.from(element.parentNode.children).indexOf(element);
+                document.querySelectorAll('.nav-links li')[idx]?.classList.add('active');
+                document.querySelectorAll('.mobile-nav li')[idx]?.classList.add('active');
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setTimeout(() => { 
                 AOS.refresh(); 
                 animateSkills(); 
                 animateCounters(); 
-                scrambleTexts();
+                if (isDesktop) scrambleTexts();
             }, 100);
         }
 
-        // ===== TEXT SCRAMBLE EFFECT =====
+        // ==========================================
+        // TEXT SCRAMBLE (desktop only)
+        // ==========================================
         class TextScramble {
             constructor(el) {
                 this.el = el;
@@ -1034,14 +1296,17 @@
         }
 
         function scrambleTexts() {
+            if (!isDesktop) return;
             document.querySelectorAll('.glitch[data-text]').forEach(el => {
                 const fx = new TextScramble(el);
                 fx.setText(el.getAttribute('data-text'));
             });
         }
-        setTimeout(scrambleTexts, 2800);
+        if (isDesktop) setTimeout(scrambleTexts, 2800);
 
-        // ===== TYPEWRITER =====
+        // ==========================================
+        // TYPEWRITER (both devices)
+        // ==========================================
         const roles = ['Web Developer', 'UI/UX Designer', 'Creative Coder', 'Tech Enthusiast', 'Problem Solver', 'Freelancer'];
         let roleIndex = 0, charIndex = 0, isDeleting = false;
         const typingEl = document.getElementById('typing-text');
@@ -1056,91 +1321,18 @@
         }
         typeEffect();
 
-        // ===== CURSORS + SPOTLIGHT =====
-        const cursorDot = document.querySelector('.cursor-dot');
-        const cursorOutline = document.querySelector('.cursor-outline');
-        const cursorGlow = document.querySelector('.cursor-glow');
-        const cursorSpot = document.querySelector('.cursor-spotlight');
-        const grid = document.getElementById('grid');
-        let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0, spotX = 0, spotY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX; mouseY = e.clientY;
-            cursorDot.style.left = `${mouseX}px`;
-            cursorDot.style.top = `${mouseY}px`;
-            cursorOutline.animate({ left: `${mouseX}px`, top: `${mouseY}px` }, { duration: 500, fill: "forwards" });
-            // Grid mask follow
-            grid.style.setProperty('--mx', `${mouseX}px`);
-            grid.style.setProperty('--my', `${mouseY}px`);
-            // Trail particle spawn
-            spawnTrailParticle(mouseX, mouseY);
-        });
-
-        function animateGlow() {
-            glowX += (mouseX - glowX) * 0.08;
-            glowY += (mouseY - glowY) * 0.08;
-            spotX += (mouseX - spotX) * 0.2;
-            spotY += (mouseY - spotY) * 0.2;
-            cursorGlow.style.left = `${glowX}px`;
-            cursorGlow.style.top = `${glowY}px`;
-            cursorSpot.style.left = `${spotX}px`;
-            cursorSpot.style.top = `${spotY}px`;
-            requestAnimationFrame(animateGlow);
-        }
-        animateGlow();
-
-        document.querySelectorAll('.hover-trigger, a, button, li').forEach(trigger => {
-            trigger.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-            trigger.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-        });
-
-        // ===== MAGNETIC BUTTONS =====
-        document.querySelectorAll('.magnetic').forEach(btn => {
-            btn.addEventListener('mousemove', (e) => {
-                const rect = btn.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.4}px)`;
-            });
-            btn.addEventListener('mouseleave', () => {
-                btn.style.transform = 'translate(0, 0)';
-            });
-        });
-
-        // ===== 3D TILT + GLARE =====
-        function addTilt(el, maxTilt) {
-            el.addEventListener('mousemove', (e) => {
-                const rect = el.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -maxTilt;
-                const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * maxTilt;
-                el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
-                el.style.setProperty('--glare-x', `${x}px`);
-                el.style.setProperty('--glare-y', `${y}px`);
-                el.style.setProperty('--glare-opacity', '1');
-                // Dynamic shadow
-                const shadowX = -rotateY * 2;
-                const shadowY = rotateX * 2;
-                el.style.boxShadow = `${shadowX}px ${shadowY}px 40px rgba(99, 102, 241, 0.3), ${shadowX/2}px ${shadowY/2}px 20px rgba(6, 182, 212, 0.2)`;
-            });
-            el.addEventListener('mouseleave', () => {
-                el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-                el.style.setProperty('--glare-opacity', '0');
-                el.style.boxShadow = '';
-            });
-        }
-        document.querySelectorAll('[data-tilt]').forEach(el => addTilt(el, 10));
-        addTilt(document.getElementById('heroVisual'), 6);
-
-        // ===== SKILL BARS =====
+        // ==========================================
+        // SKILL BARS
+        // ==========================================
         function animateSkills() {
             document.querySelectorAll('.skill-fill').forEach(fill => {
                 fill.style.width = fill.getAttribute('data-percent') + '%';
             });
         }
 
-        // ===== COUNTER =====
+        // ==========================================
+        // COUNTER
+        // ==========================================
         function animateCounters() {
             document.querySelectorAll('.counter').forEach(counter => {
                 const target = +counter.getAttribute('data-target');
@@ -1155,178 +1347,332 @@
             });
         }
 
-        // ===== PARTICLE BACKGROUND =====
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particlesArray;
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            trailCanvas.width = window.innerWidth;
-            trailCanvas.height = window.innerHeight;
-            init();
-        });
-
-        const mouse = { x: null, y: null, radius: 150 };
-        window.addEventListener('mousemove', (event) => { mouse.x = event.x; mouse.y = event.y; });
-
-        class Particle {
-            constructor(x, y, directionX, directionY, size) {
-                this.x = x; this.y = y;
-                this.directionX = directionX; this.directionY = directionY;
-                this.size = size;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = '#6366f1';
-                ctx.fill();
-            }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-                let dx = mouse.x - this.x, dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < mouse.radius + this.size) {
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) this.x += 3;
-                    if (mouse.x > this.x && this.x > this.size * 10) this.x -= 3;
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) this.y += 3;
-                    if (mouse.y > this.y && this.y > this.size * 10) this.y -= 3;
-                }
-                this.x += this.directionX;
-                this.y += this.directionY;
-                this.draw();
-            }
-        }
-
-        function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 12000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2) + 1;
-                let x = Math.random() * innerWidth;
-                let y = Math.random() * innerHeight;
-                let directionX = (Math.random() * 1) - 0.5;
-                let directionY = (Math.random() * 1) - 0.5;
-                particlesArray.push(new Particle(x, y, directionX, directionY, size));
-            }
-        }
-
-        function connect() {
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
-                    if (distance < (canvas.width/8) * (canvas.height/8)) {
-                        let opacityValue = 1 - (distance/20000);
-                        ctx.strokeStyle = 'rgba(99, 102, 241,' + opacityValue + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-        function animateParticles() {
-            requestAnimationFrame(animateParticles);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-            for (let i = 0; i < particlesArray.length; i++) particlesArray[i].update();
-            connect();
-        }
-
-        init();
-        animateParticles();
-
-        // ===== PARTICLE TRAIL =====
-        const trailCanvas = document.getElementById('trail-canvas');
-        const tctx = trailCanvas.getContext('2d');
-        trailCanvas.width = window.innerWidth;
-        trailCanvas.height = window.innerHeight;
-        let trailParticles = [];
-
-        class TrailParticle {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.size = Math.random() * 3 + 1;
-                this.speedX = (Math.random() - 0.5) * 2;
-                this.speedY = (Math.random() - 0.5) * 2;
-                this.life = 1;
-                this.color = Math.random() > 0.5 ? '#6366f1' : '#06b6d4';
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                this.life -= 0.025;
-                this.size *= 0.96;
-            }
-            draw() {
-                tctx.globalAlpha = this.life;
-                tctx.fillStyle = this.color;
-                tctx.shadowBlur = 15;
-                tctx.shadowColor = this.color;
-                tctx.beginPath();
-                tctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                tctx.fill();
-            }
-        }
-
-        function spawnTrailParticle(x, y) {
-            if (trailParticles.length < 30 && Math.random() > 0.6) {
-                trailParticles.push(new TrailParticle(x, y));
-            }
-        }
-
-        function animateTrail() {
-            requestAnimationFrame(animateTrail);
-            tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-            trailParticles = trailParticles.filter(p => p.life > 0);
-            trailParticles.forEach(p => { p.update(); p.draw(); });
-            tctx.globalAlpha = 1;
-        }
-        animateTrail();
-
-        // ===== SCROLL PROGRESS =====
+        // ==========================================
+        // SCROLL PROGRESS
+        // ==========================================
         window.addEventListener('scroll', () => {
             const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
             document.getElementById('scrollProgress').style.width = scrolled + '%';
-        });
+        }, { passive: true });
 
-        // ===== DRAGGABLE MARQUEE =====
-        (function() {
-            const marquee = document.getElementById('marquee');
-            const track = document.getElementById('marqueeTrack');
-            if (!marquee || !track) return;
-            let isDown = false, startX, scrollLeft;
-            marquee.addEventListener('mousedown', (e) => {
-                isDown = true;
-                marquee.classList.add('dragging');
-                startX = e.pageX;
-                const transform = getComputedStyle(track).transform;
-                const matrix = new DOMMatrix(transform);
-                scrollLeft = matrix.m41;
-            });
-            marquee.addEventListener('mouseleave', () => { isDown = false; marquee.classList.remove('dragging'); });
-            marquee.addEventListener('mouseup', () => { isDown = false; marquee.classList.remove('dragging'); });
-            marquee.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const walk = (e.pageX - startX) * 1.5;
-                track.style.animation = 'none';
-                track.style.transform = `translateX(${scrollLeft + walk}px)`;
-            });
-            marquee.addEventListener('click', (e) => {
-                if (Math.abs(e.pageX - startX) > 5) e.preventDefault();
-            });
-        })();
+        // ==========================================
+        // 🖥️ DESKTOP-ONLY EFFECTS (SEMUA BERAT DI SINI!)
+        // ==========================================
+        if (isDesktop) {
+            // ---- CURSORS + SPOTLIGHT ----
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorOutline = document.querySelector('.cursor-outline');
+            const cursorGlow = document.querySelector('.cursor-glow');
+            const cursorSpot = document.querySelector('.cursor-spotlight');
+            const grid = document.getElementById('grid');
+            let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0, spotX = 0, spotY = 0;
 
-        // ===== INITIAL CALLS =====
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX; mouseY = e.clientY;
+                cursorDot.style.left = `${mouseX}px`;
+                cursorDot.style.top = `${mouseY}px`;
+                cursorOutline.animate({ left: `${mouseX}px`, top: `${mouseY}px` }, { duration: 500, fill: "forwards" });
+                grid.style.setProperty('--mx', `${mouseX}px`);
+                grid.style.setProperty('--my', `${mouseY}px`);
+                spawnTrailParticle(mouseX, mouseY);
+            });
+
+            function animateGlow() {
+                glowX += (mouseX - glowX) * 0.08;
+                glowY += (mouseY - glowY) * 0.08;
+                spotX += (mouseX - spotX) * 0.2;
+                spotY += (mouseY - spotY) * 0.2;
+                cursorGlow.style.left = `${glowX}px`;
+                cursorGlow.style.top = `${glowY}px`;
+                cursorSpot.style.left = `${spotX}px`;
+                cursorSpot.style.top = `${spotY}px`;
+                requestAnimationFrame(animateGlow);
+            }
+            animateGlow();
+
+            document.querySelectorAll('a, button, li, .glass-card').forEach(trigger => {
+                trigger.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+                trigger.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            });
+
+            // ---- MAGNETIC BUTTONS ----
+            document.querySelectorAll('.magnetic').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    btn.style.transform = `translate(${x * 0.3}px, ${y * 0.4}px)`;
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = 'translate(0, 0)';
+                });
+            });
+
+            // ---- 3D TILT + GLARE ----
+            function addTilt(el, maxTilt) {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -maxTilt;
+                    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * maxTilt;
+                    el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+                    el.style.setProperty('--glare-x', `${x}px`);
+                    el.style.setProperty('--glare-y', `${y}px`);
+                    el.style.setProperty('--glare-opacity', '1');
+                    const shadowX = -rotateY * 2;
+                    const shadowY = rotateX * 2;
+                    el.style.boxShadow = `${shadowX}px ${shadowY}px 40px rgba(99, 102, 241, 0.3), ${shadowX/2}px ${shadowY/2}px 20px rgba(6, 182, 212, 0.2)`;
+                });
+                el.addEventListener('mouseleave', () => {
+                    el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                    el.style.setProperty('--glare-opacity', '0');
+                    el.style.boxShadow = '';
+                });
+            }
+            document.querySelectorAll('[data-tilt]').forEach(el => addTilt(el, 10));
+            const heroVisual = document.getElementById('heroVisual');
+            if (heroVisual) addTilt(heroVisual, 6);
+
+            // ---- PARTICLE BACKGROUND (FULL VERSION) ----
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let particlesArray = [];
+            let animationId;
+            let isCanvasActive = true;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const tc = document.getElementById('trail-canvas');
+                if (tc) {
+                    tc.width = window.innerWidth;
+                    tc.height = window.innerHeight;
+                }
+            }
+            resizeCanvas();
+
+            const mouse = { x: null, y: null, radius: 150 };
+            window.addEventListener('mousemove', (event) => { mouse.x = event.x; mouse.y = event.y; });
+            window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+
+            class Particle {
+                constructor() {
+                    this.size = (Math.random() * 2) + 1;
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.directionX = (Math.random() * 1) - 0.5;
+                    this.directionY = (Math.random() * 1) - 0.5;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = '#6366f1';
+                    ctx.fill();
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                    if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                    
+                    if (mouse.x !== null) {
+                        let dx = mouse.x - this.x, dy = mouse.y - this.y;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+                        if (distance < mouse.radius + this.size) {
+                            if (mouse.x < this.x && this.x < canvas.width - this.size * 10) this.x += 3;
+                            if (mouse.x > this.x && this.x > this.size * 10) this.x -= 3;
+                            if (mouse.y < this.y && this.y < canvas.height - this.size * 10) this.y += 3;
+                            if (mouse.y > this.y && this.y > this.size * 10) this.y -= 3;
+                        }
+                    }
+                    
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
+            }
+
+            function initParticles() {
+                particlesArray = [];
+                let numberOfParticles = Math.floor((canvas.width * canvas.height) / 12000);
+                numberOfParticles = Math.min(numberOfParticles, 120);
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function connectParticles() {
+                const maxDist = (canvas.width / 8) * (canvas.height / 8);
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a + 1; b < particlesArray.length; b++) {
+                        const dx = particlesArray[a].x - particlesArray[b].x;
+                        const dy = particlesArray[a].y - particlesArray[b].y;
+                        const distance = dx * dx + dy * dy;
+                        if (distance < maxDist) {
+                            const opacityValue = 1 - (distance / 20000);
+                            ctx.strokeStyle = `rgba(99, 102, 241,${opacityValue})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animateParticles() {
+                if (!isCanvasActive) return;
+                animationId = requestAnimationFrame(animateParticles);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                connectParticles();
+            }
+
+            initParticles();
+            animateParticles();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    isCanvasActive = false;
+                    cancelAnimationFrame(animationId);
+                } else {
+                    isCanvasActive = true;
+                    animateParticles();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                initParticles();
+            });
+
+            // ---- PARTICLE TRAIL ----
+            const trailCanvas = document.getElementById('trail-canvas');
+            const tctx = trailCanvas.getContext('2d');
+            let trailParticles = [];
+
+            class TrailParticle {
+                constructor(x, y) {
+                    this.x = x; this.y = y;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = (Math.random() - 0.5) * 2;
+                    this.speedY = (Math.random() - 0.5) * 2;
+                    this.life = 1;
+                    this.color = Math.random() > 0.5 ? '#6366f1' : '#06b6d4';
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.life -= 0.025;
+                    this.size *= 0.96;
+                }
+                draw() {
+                    tctx.globalAlpha = this.life;
+                    tctx.fillStyle = this.color;
+                    tctx.shadowBlur = 15;
+                    tctx.shadowColor = this.color;
+                    tctx.beginPath();
+                    tctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    tctx.fill();
+                }
+            }
+
+            function spawnTrailParticle(x, y) {
+                if (trailParticles.length < 30 && Math.random() > 0.6) {
+                    trailParticles.push(new TrailParticle(x, y));
+                }
+            }
+            window.spawnTrailParticle = spawnTrailParticle;
+
+            function animateTrail() {
+                requestAnimationFrame(animateTrail);
+                tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+                trailParticles = trailParticles.filter(p => p.life > 0);
+                trailParticles.forEach(p => { p.update(); p.draw(); });
+                tctx.globalAlpha = 1;
+            }
+            animateTrail();
+
+            // ---- DRAGGABLE MARQUEE (mouse) ----
+            (function() {
+                const marquee = document.getElementById('marquee');
+                const track = document.getElementById('marqueeTrack');
+                if (!marquee || !track) return;
+                let isDown = false, startX, scrollLeft;
+                marquee.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    marquee.classList.add('dragging');
+                    startX = e.pageX;
+                    const transform = getComputedStyle(track).transform;
+                    const matrix = new DOMMatrix(transform);
+                    scrollLeft = matrix.m41;
+                });
+                marquee.addEventListener('mouseleave', () => { isDown = false; marquee.classList.remove('dragging'); });
+                marquee.addEventListener('mouseup', () => { isDown = false; marquee.classList.remove('dragging'); });
+                marquee.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const walk = (e.pageX - startX) * 1.5;
+                    track.style.animation = 'none';
+                    track.style.transform = `translateX(${scrollLeft + walk}px)`;
+                });
+                marquee.addEventListener('click', (e) => {
+                    if (Math.abs(e.pageX - startX) > 5) e.preventDefault();
+                });
+            })();
+
+        } else {
+            // ==========================================
+            // 📱 MOBILE-ONLY: Stub function + touch marquee
+            // ==========================================
+            window.spawnTrailParticle = function() {};
+
+            // Touch drag marquee
+            (function() {
+                const marquee = document.getElementById('marquee');
+                const track = document.getElementById('marqueeTrack');
+                if (!marquee || !track) return;
+
+                let touchStartX = 0, touchScrollLeft = 0, isTouchDragging = false;
+                marquee.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    const transform = getComputedStyle(track).transform;
+                    const matrix = new DOMMatrix(transform);
+                    touchScrollLeft = matrix.m41;
+                    isTouchDragging = true;
+                }, { passive: true });
+                marquee.addEventListener('touchmove', (e) => {
+                    if (!isTouchDragging) return;
+                    const walk = (e.touches[0].clientX - touchStartX) * 1.2;
+                    track.style.animation = 'none';
+                    track.style.transform = `translateX(${touchScrollLeft + walk}px)`;
+                }, { passive: true });
+                marquee.addEventListener('touchend', () => {
+                    isTouchDragging = false;
+                    setTimeout(() => {
+                        if (!isTouchDragging) {
+                            track.style.animation = '';
+                            track.style.transform = '';
+                        }
+                    }, 2000);
+                });
+            })();
+
+            // Prevent double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (e) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) e.preventDefault();
+                lastTouchEnd = now;
+            }, { passive: false });
+        }
+
+        // ==========================================
+        // INITIAL CALLS
+        // ==========================================
         setTimeout(() => { animateSkills(); animateCounters(); }, 500);
-        window.addEventListener('mouseout', () => { mouse.x = undefined; mouse.y = undefined; });
     </script>
 </body>
 </html>
