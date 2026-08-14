@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Trigonometri & Sound Wave Lab</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg: #05060f;
+    --bg2: #0a0d1f;
+    --neon1: #00f0ff;
+    --neon2: #ff00e5;
+    --neon3: #b4ff00;
+    --text: #e8f1ff;
+    --dim: #8a9bb8;
+    --card: rgba(20, 25, 50, 0.55);
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(ellipse at top, #0a0d1f 0%, #05060f 70%);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+  header {
+    text-align:center; padding:40px 20px 20px;
+    position:relative; z-index:1;
+  }
+  header h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    background: linear-gradient(90deg, var(--neon1), var(--neon2), var(--neon3));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 40px rgba(0,240,255,0.3);
+    letter-spacing: 2px;
+  }
+  header p { color: var(--dim); margin-top:8px; font-size:0.95rem; }
+
+  nav {
+    display:flex; justify-content:center; flex-wrap:wrap;
+    gap:8px; margin: 20px auto; max-width: 1100px; padding: 0 10px;
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(10px);
+    background: rgba(5,6,15,0.7);
+    padding: 12px; border-radius: 14px;
+    border: 1px solid rgba(0,240,255,0.15);
+  }
+  nav button {
+    background: transparent; color: var(--text);
+    border: 1px solid rgba(0,240,255,0.3);
+    padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  nav button:hover, nav button.active {
+    background: linear-gradient(90deg, var(--neon1), var(--neon2));
+    color: #000; font-weight: bold;
+    box-shadow: 0 0 20px rgba(0,240,255,0.5);
+    border-color: transparent;
+  }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index:1; }
+  section { display:none; animation: fadeIn 0.5s; }
+  section.active { display:block; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+
+  .card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,240,255,0.15);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .card h2 {
+    color: var(--neon1); margin-bottom: 16px;
+    border-bottom: 1px solid rgba(0,240,255,0.2);
+    padding-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card h3 { color: var(--neon2); margin: 14px 0 8px; font-size: 1.05rem; }
+
+  .grid-2 { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+  .grid-3 { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; }
+
+  .formula {
+    background: rgba(0,0,0,0.4);
+    border-left: 3px solid var(--neon1);
+    padding: 10px 14px; margin: 8px 0;
+    border-radius: 6px; font-family: 'Courier New', monospace;
+    font-size: 0.95rem; overflow-x: auto;
+  }
+  .formula.pink { border-left-color: var(--neon2); }
+  .formula.green { border-left-color: var(--neon3); }
+
+  table {
+    width:100%; border-collapse: collapse; margin: 10px 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 8px 10px; border: 1px solid rgba(0,240,255,0.15);
+    text-align: center;
+  }
+  th { background: rgba(0,240,255,0.1); color: var(--neon1); }
+  tr:hover td { background: rgba(0,240,255,0.05); }
+
+  canvas {
+    width:100%; height:200px; background: #000;
+    border-radius: 10px; border: 1px solid rgba(0,240,255,0.2);
+    display:block;
+  }
+  canvas.big { height: 280px; }
+  canvas.spectrum { height: 180px; }
+
+  .controls {
+    display:flex; flex-wrap:wrap; gap:14px; align-items:center;
+    margin: 14px 0;
+  }
+  .control-group {
+    display:flex; flex-direction:column; gap:4px;
+    min-width: 180px;
+  }
+  label { font-size: 0.85rem; color: var(--dim); }
+  input[type=range] {
+    -webkit-appearance:none; width:100%; height:6px;
+    background: linear-gradient(90deg, var(--neon1), var(--neon2));
+    border-radius: 3px; outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px;
+    background: #fff; border-radius:50%; cursor:pointer;
+    box-shadow: 0 0 10px var(--neon1);
+  }
+  input[type=range]::-moz-range-thumb {
+    width:18px; height:18px; background:#fff; border-radius:50%;
+    border:none; cursor:pointer;
+  }
+  select, input[type=number] {
+    background: rgba(0,0,0,0.5); color: var(--text);
+    border: 1px solid rgba(0,240,255,0.3);
+    padding: 8px; border-radius: 6px;
+  }
+  button.btn {
+    background: linear-gradient(90deg, var(--neon1), var(--neon2));
+    color: #000; border:none; padding: 10px 20px;
+    border-radius: 8px; cursor:pointer; font-weight:bold;
+    transition: all 0.2s;
+  }
+  button.btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,240,255,0.4); }
+  button.btn.ghost {
+    background: transparent; color: var(--neon1);
+    border: 1px solid var(--neon1);
+  }
+  button.btn.danger { background: linear-gradient(90deg, #ff3860, #ff00e5); color:#fff; }
+
+  .freq-display {
+    font-size: 2.5rem; font-weight: bold;
+    background: linear-gradient(90deg, var(--neon1), var(--neon3));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    text-align:center; margin: 10px 0;
+    font-family: 'Courier New', monospace;
+  }
+  .freq-sub { text-align:center; color: var(--dim); font-size:0.9rem; }
+
+  .piano {
+    display:flex; justify-content:center; gap:4px;
+    margin: 20px 0; flex-wrap: wrap;
+  }
+  .key {
+    width: 70px; height: 180px;
+    background: linear-gradient(180deg, #fff 0%, #ddd 100%);
+    border: 1px solid #333; border-radius: 0 0 8px 8px;
+    cursor:pointer; position:relative;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    align-items:center; padding-bottom:10px;
+    color: #333; font-weight:bold;
+    transition: all 0.1s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    user-select: none;
+  }
+  .key span.note { font-size: 1.2rem; }
+  .key span.freq { font-size: 0.7rem; color: #666; margin-top:4px; }
+  .key:active, .key.active {
+    background: linear-gradient(180deg, var(--neon1) 0%, var(--neon2) 100%);
+    color: #000; transform: translateY(2px);
+    box-shadow: 0 0 30px var(--neon1);
+  }
+
+  .meter {
+    height: 8px; background: rgba(0,0,0,0.5);
+    border-radius: 4px; overflow: hidden; margin-top: 4px;
+  }
+  .meter-fill {
+    height:100%; width:0%;
+    background: linear-gradient(90deg, var(--neon3), var(--neon1), var(--neon2));
+    transition: width 0.1s;
+  }
+
+  .warning {
+    background: rgba(255,56,96,0.15);
+    border: 1px solid #ff3860;
+    padding: 12px; border-radius: 8px;
+    color: #ffb3c1; margin: 10px 0;
+    font-size: 0.9rem;
+  }
+
+  .unit-circle {
+    display:flex; justify-content:center; align-items:center;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .unit-circle canvas { max-width: 400px; height: 400px !important; }
+
+  .info-pill {
+    display:inline-block; padding: 4px 10px;
+    background: rgba(0,240,255,0.15);
+    border-radius: 12px; font-size: 0.8rem;
+    color: var(--neon1); margin: 2px;
+  }
+
+  footer {
+    text-align:center; padding: 30px 20px;
+    color: var(--dim); font-size: 0.85rem;
+    border-top: 1px solid rgba(0,240,255,0.1);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 600px) {
+    .key { width: 50px; height: 140px; }
+    .key span.note { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌊 TRIGONOMETRY & SOUND WAVE LAB</h1>
+  <p>Eksplorasi fungsi trigonometri, gelombang suara, dan frekuensi audio — 0 Hz hingga 20.000+ Hz</p>
+</header>
+
+<nav>
+  <button class="active" data-tab="teori">📐 Teori</button>
+  <button data-tab="visual"> Visualisasi Gelombang</button>
+  <button data-tab="frekuensi">🎚️ Simulator Frekuensi</button>
+  <button data-tab="piano">🎹 Piano Do-Re-Mi</button>
+  <button data-tab="spectrum">️ Spectrum Analyzer</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB 1: TEORI ============ -->
+<section id="teori" class="active">
+  <div class="card">
+    <h2>📐 Apa itu Trigonometri?</h2>
+    <p>Trigonometri adalah cabang matematika yang mempelajari hubungan antara <b>sudut</b> dan <b>sisi</b> segitiga siku-siku, serta fungsi-fungsi periodik seperti sinus, kosinus, dan tangen.</p>
+    <div style="margin-top:12px;">
+      <span class="info-pill">Sinus</span>
+      <span class="info-pill">Cosinus</span>
+      <span class="info-pill">Tangen</span>
+      <span class="info-pill">Cotangen</span>
+      <span class="info-pill">Secans</span>
+      <span class="info-pill">Cosecans</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔺 Enam Fungsi Trigonometri Dasar</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Sinus (sin)</h3>
+        <div class="formula">sin θ = depan / miring = y / r</div>
+        <h3>Cosinus (cos)</h3>
+        <div class="formula pink">cos θ = samping / miring = x / r</div>
+        <h3>Tangen (tan)</h3>
+        <div class="formula green">tan θ = depan / samping = sin θ / cos θ</div>
+      </div>
+      <div>
+        <h3>Cotangen (cot)</h3>
+        <div class="formula">cot θ = 1 / tan θ = cos θ / sin θ</div>
+        <h3>Secans (sec)</h3>
+        <div class="formula pink">sec θ = 1 / cos θ = r / x</div>
+        <h3>Cosecans (csc)</h3>
+        <div class="formula green">csc θ = 1 / sin θ = r / y</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Nilai Sudut Istimewa</h2>
+    <div style="overflow-x:auto;">
+    <table>
+      <tr><th>θ</th><th>0°</th><th>30°</th><th>45°</th><th>60°</th><th>90°</th></tr>
+      <tr><td><b>sin</b></td><td>0</td><td>½</td><td>½√2</td><td>½√3</td><td>1</td></tr>
+      <tr><td><b>cos</b></td><td>1</td><td>½√3</td><td>½√2</td><td>½</td><td>0</td></tr>
+      <tr><td><b>tan</b></td><td>0</td><td>⅓√3</td><td>1</td><td>√3</td><td>∞</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🌀 Identitas Pythagoras & Identitas Dasar</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Identitas Pythagoras</h3>
+        <div class="formula">sin²θ + cos²θ = 1</div>
+        <div class="formula pink">1 + tan²θ = sec²θ</div>
+        <div class="formula green">1 + cot²θ = csc²θ</div>
+      </div>
+      <div>
+        <h3>Identitas Kebalikan</h3>
+        <div class="formula">csc θ = 1/sin θ</div>
+        <div class="formula pink">sec θ = 1/cos θ</div>
+        <div class="formula green">cot θ = 1/tan θ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>➗ Rumus Penjumlahan & Pengurangan</h2>
+    <div class="formula">sin(A ± B) = sin A cos B ± cos A sin B</div>
+    <div class="formula pink">cos(A ± B) = cos A cos B ∓ sin A sin B</div>
+    <div class="formula green">tan(A ± B) = (tan A ± tan B) / (1 ∓ tan A tan B)</div>
+  </div>
+
+  <div class="card">
+    <h2>✖️ Rumus Sudut Ganda</h2>
+    <div class="grid-2">
+      <div>
+        <div class="formula">sin 2A = 2 sin A cos A</div>
+        <div class="formula pink">cos 2A = cos²A − sin²A</div>
+        <div class="formula green">tan 2A = 2 tan A / (1 − tan²A)</div>
+      </div>
+      <div>
+        <h3>Bentuk lain cos 2A:</h3>
+        <div class="formula">cos 2A = 2cos²A − 1</div>
+        <div class="formula pink">cos 2A = 1 − 2sin²A</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⭕ Lingkaran Satuan (Unit Circle)</h2>
+    <p style="margin-bottom:12px;">Pada lingkaran berjari-jari 1, koordinat titik pada sudut θ adalah <b>(cos θ, sin θ)</b>.</p>
+    <div class="unit-circle">
+      <canvas id="unitCircle" width="400" height="400"></canvas>
+      <div>
+        <div class="control-group">
+          <label>Sudut θ: <span id="ucAngleVal">45</span>°</label>
+          <input type="range" id="ucAngle" min="0" max="360" value="45">
+        </div>
+        <div class="formula" style="margin-top:12px;">
+          cos θ = <span id="ucCos">0.707</span><br>
+          sin θ = <span id="ucSin">0.707</span><br>
+          tan θ = <span id="ucTan">1.000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2> Hubungan dengan Gelombang Suara</h2>
+    <p>Gelombang suara murni (pure tone) direpresentasikan oleh fungsi sinus:</p>
+    <div class="formula" style="font-size:1.1rem;">y(t) = A · sin(2π · f · t + φ)</div>
+    <p style="margin-top:10px;">
+      • <b>A</b> = Amplitudo (volume)<br>
+      • <b>f</b> = Frekuensi (Hz) — menentukan nada<br>
+      • <b>t</b> = Waktu (detik)<br>
+      • <b>φ</b> = Fase (rad)
+    </p>
+  </div>
+</section>
+
+<!-- ============ TAB 2: VISUALISASI GELOMBANG ============ -->
+<section id="visual">
+  <div class="card">
+    <h2>📈 Visualisasi Gelombang Trigonometri</h2>
+    <div class="controls">
+      <div class="control-group">
+        <label>Fungsi</label>
+        <select id="waveFunc">
+          <option value="sin">sin(x)</option>
+          <option value="cos">cos(x)</option>
+          <option value="tan">tan(x)</option>
+          <option value="cot">cot(x)</option>
+          <option value="sec">sec(x)</option>
+          <option value="csc">csc(x)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Amplitudo: <span id="ampVal">1.0</span></label>
+        <input type="range" id="amp" min="0.1" max="3" step="0.1" value="1">
+      </div>
+      <div class="control-group">
+        <label>Frekuensi: <span id="freqVal">1.0</span></label>
+        <input type="range" id="freq" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="control-group">
+        <label>Fase (°): <span id="phaseVal">0</span></label>
+        <input type="range" id="phase" min="0" max="360" step="1" value="0">
+      </div>
+      <div class="control-group">
+        <label>&nbsp;</label>
+        <button class="btn ghost" id="toggleAnim">▶ Animasi</button>
+      </div>
+    </div>
+    <canvas id="waveCanvas" class="big"></canvas>
+    <p style="color:var(--dim); font-size:0.85rem; margin-top:8px;">
+      Persamaan saat ini: <span id="eqDisplay" style="color:var(--neon1);">y = 1.0 · sin(1.0x + 0°)</span>
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>🌊 Superposisi Gelombang (Penjumlahan)</h2>
+    <p style="color:var(--dim); margin-bottom:10px;">Dua gelombang sinus dijumlahkan — dasar dari harmoni musik!</p>
+    <div class="controls">
+      <div class="control-group">
+        <label>Gelombang 1 - Frekuensi: <span id="f1Val">1</span></label>
+        <input type="range" id="f1" min="1" max="10" step="0.1" value="1">
+      </div>
+      <div class="control-group">
+        <label>Gelombang 2 - Frekuensi: <span id="f2Val">2</span></label>
+        <input type="range" id="f2" min="1" max="10" step="0.1" value="2">
+      </div>
+    </div>
+    <canvas id="superCanvas" class="big"></canvas>
+  </div>
+</section>
+
+<!-- ============ TAB 3: SIMULATOR FREKUENSI ============ -->
+<section id="frekuensi">
+  <div class="card">
+    <h2>🎚️ Simulator Frekuensi Audio (0 - 20.000+ Hz)</h2>
+    <div class="warning">
+      ️ <b>PERINGATAN:</b> Turunkan volume speaker Anda sebelum mencoba! Frekuensi tinggi (&gt;15kHz) dapat menyebabkan ketidaknyamanan. Jangan gunakan headphone dengan volume tinggi.
+    </div>
+
+    <div class="freq-display" id="freqDisplay">440.00 Hz</div>
+    <div class="freq-sub" id="freqNote">Nada: A4 (La) — Rentang pendengaran manusia</div>
+
+    <div class="controls">
+      <div class="control-group" style="flex:1; min-width:250px;">
+        <label>Frekuensi (Hz) — Skala Logaritmik</label>
+        <input type="range" id="soundFreq" min="0" max="1000" step="0.1" value="440">
+      </div>
+      <div class="control-group">
+        <label>Volume: <span id="volVal">20</span>%</label>
+        <input type="range" id="soundVol" min="0" max="100" step="1" value="20">
+      </div>
+      <div class="control-group">
+        <label>Tipe Gelombang</label>
+        <select id="waveType">
+          <option value="sine">Sine (murni)</option>
+          <option value="square">Square</option>
+          <option value="sawtooth">Sawtooth</option>
+          <option value="triangle">Triangle</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin: 14px 0;">
+      <button class="btn" id="playBtn">▶ PUTAR</button>
+      <button class="btn danger" id="stopBtn">⏹ STOP</button>
+      <button class="btn ghost" onclick="setFreq(20)">20 Hz</button>
+      <button class="btn ghost" onclick="setFreq(100)">100 Hz</button>
+      <button class="btn ghost" onclick="setFreq(440)">440 Hz (A4)</button>
+      <button class="btn ghost" onclick="setFreq(1000)">1 kHz</button>
+      <button class="btn ghost" onclick="setFreq(5000)">5 kHz</button>
+      <button class="btn ghost" onclick="setFreq(10000)">10 kHz</button>
+      <button class="btn ghost" onclick="setFreq(15000)">15 kHz</button>
+      <button class="btn ghost" onclick="setFreq(20000)">20 kHz</button>
+    </div>
+
+    <canvas id="soundWaveCanvas" class="big"></canvas>
+
+    <div style="margin-top:14px;">
+      <label style="color:var(--dim); font-size:0.85rem;">📊 Rentang Frekuensi:</label>
+      <div class="meter"><div class="meter-fill" id="freqMeter" style="width:22%"></div></div>
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--dim); margin-top:4px;">
+        <span>0 Hz</span><span>20 Hz</span><span>1 kHz</span><span>10 kHz</span><span>20 kHz+</span>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:20px;">
+      <div class="formula">🔊 Sub-bass: 20-60 Hz</div>
+      <div class="formula pink">🥁 Bass: 60-250 Hz</div>
+      <div class="formula green">🎸 Low Mid: 250-500 Hz</div>
+      <div class="formula"> Mid: 500-2kHz</div>
+      <div class="formula pink"> High Mid: 2-4 kHz</div>
+      <div class="formula green"> Brilliance: 4-20 kHz</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 4: PIANO ============ -->
+<section id="piano">
+  <div class="card">
+    <h2>🎹 Piano Do-Re-Mi-Fa-Sol-La-Si-Do</h2>
+    <p style="color:var(--dim); margin-bottom:10px;">Klik tuts atau gunakan keyboard: <b>A S D F G H J K</b></p>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Oktaf Dasar</label>
+        <select id="octaveSelect">
+          <option value="3">Oktaf 3 (rendah)</option>
+          <option value="4" selected>Oktaf 4 (standar)</option>
+          <option value="5">Oktaf 5 (tinggi)</option>
+          <option value="6">Oktaf 6 (sangat tinggi)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Volume: <span id="pVolVal">25</span>%</label>
+        <input type="range" id="pVol" min="0" max="100" value="25">
+      </div>
+      <div class="control-group">
+        <label>Tipe Suara</label>
+        <select id="pWave">
+          <option value="sine">Sine (lembut)</option>
+          <option value="triangle">Triangle</option>
+          <option value="square">Square</option>
+          <option value="sawtooth">Sawtooth</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="piano" id="pianoKeys"></div>
+
+    <canvas id="pianoWaveCanvas" class="big"></canvas>
+
+    <div class="card" style="margin-top:20px; background: rgba(0,0,0,0.3);">
+      <h3>🎵 Frekuensi Nada (Oktaf 4, A4 = 440Hz)</h3>
+      <div class="grid-3">
+        <div class="formula">Do (C4) = 261.63 Hz</div>
+        <div class="formula pink">Re (D4) = 293.66 Hz</div>
+        <div class="formula green">Mi (E4) = 329.63 Hz</div>
+        <div class="formula">Fa (F4) = 349.23 Hz</div>
+        <div class="formula pink">Sol (G4) = 392.00 Hz</div>
+        <div class="formula green">La (A4) = 440.00 Hz</div>
+        <div class="formula">Si (B4) = 493.88 Hz</div>
+        <div class="formula pink">Do' (C5) = 523.25 Hz</div>
+      </div>
+      <p style="margin-top:10px; color:var(--dim); font-size:0.85rem;">
+        💡 Rumus: <code>f(n) = 440 · 2^((n-49)/12)</code> dimana n = nomor tuts piano (A4 = 49)
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB 5: SPECTRUM ============ -->
+<section id="spectrum">
+  <div class="card">
+    <h2>🎛️ Spectrum Analyzer Real-Time</h2>
+    <p style="color:var(--dim); margin-bottom:10px;">Analisis frekuensi dari suara mikrofon Anda atau putar simulator di tab "Frekuensi".</p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+      <button class="btn" id="micBtn">🎤 Aktifkan Mikrofon</button>
+      <button class="btn danger" id="micStop">⏹ Stop Mic</button>
+      <button class="btn ghost" id="demoBtn">🎵 Demo Sinyal</button>
+    </div>
+
+    <h3 style="color:var(--neon2);">📊 Waveform (Domain Waktu)</h3>
+    <canvas id="specWave" class="big"></canvas>
+
+    <h3 style="color:var(--neon2); margin-top:14px;">📈 Frequency Spectrum (Domain Frekuensi)</h3>
+    <canvas id="specFreq" class="spectrum"></canvas>
+
+    <div style="margin-top:14px;">
+      <label style="color:var(--dim); font-size:0.85rem;">Level Input:</label>
+      <div class="meter"><div class="meter-fill" id="levelMeter" style="width:0%"></div></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>🌊 Trigonometry & Sound Wave Lab — Dibuat untuk eksplorasi matematika & audio</p>
+  <p style="margin-top:6px;">Web Audio API • Canvas • Pure JavaScript</p>
+</footer>
+
+<script>
+// ============ TAB NAVIGATION ============
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    // Re-render canvases when tab becomes active
+    setTimeout(() => {
+      if (btn.dataset.tab === 'visual') { drawWave(); drawSuper(); }
+      if (btn.dataset.tab === 'teori') drawUnitCircle(+document.getElementById('ucAngle').value);
+    }, 100);
+  });
+});
+
+// ============ CANVAS RESIZE (DIPERBAIKI) ============
+function resizeCanvas(c) {
+  if (!c) return;
+  const rect = c.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.max(rect.width, 300);
+  const h = Math.max(rect.height, 150);
+  c.width = w * dpr;
+  c.height = h * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  c.style.width = w + 'px';
+  c.style.height = h + 'px';
+}
+
+function resizeAll() {
+  const canvases = [
+    document.getElementById('unitCircle'),
+    document.getElementById('waveCanvas'),
+    document.getElementById('superCanvas'),
+    document.getElementById('soundWaveCanvas'),
+    document.getElementById('pianoWaveCanvas'),
+    document.getElementById('specWave'),
+    document.getElementById('specFreq')
+  ];
+  canvases.forEach(resizeCanvas);
+}
+
+// ============ UNIT CIRCLE ============
+const ucCanvas = document.getElementById('unitCircle');
+const ucCtx = ucCanvas.getContext('2d');
+const ucAngle = document.getElementById('ucAngle');
+
+function drawUnitCircle(deg) {
+  if (!ucCanvas) return;
+  const rect = ucCanvas.getBoundingClientRect();
+  const w = rect.width || 400;
+  const h = rect.height || 400;
+  const dpr = window.devicePixelRatio || 1;
+  ucCanvas.width = w * dpr;
+  ucCanvas.height = h * dpr;
+  ucCtx.scale(dpr, dpr);
+  ucCanvas.style.width = w + 'px';
+  ucCanvas.style.height = h + 'px';
+  
+  const cx = w/2, cy = h/2, r = Math.min(w, h) * 0.35;
+  ucCtx.clearRect(0,0,w,h);
+  
+  // grid
+  ucCtx.strokeStyle = 'rgba(0,240,255,0.1)';
+  ucCtx.lineWidth = 1;
+  for (let i = -3; i <= 3; i++) {
+    ucCtx.beginPath(); ucCtx.moveTo(cx + i*50, 0); ucCtx.lineTo(cx + i*50, h); ucCtx.stroke();
+    ucCtx.beginPath(); ucCtx.moveTo(0, cy + i*50); ucCtx.lineTo(w, cy + i*50); ucCtx.stroke();
+  }
+  // axes
+  ucCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ucCtx.beginPath(); ucCtx.moveTo(0, cy); ucCtx.lineTo(w, cy); ucCtx.stroke();
+  ucCtx.beginPath(); ucCtx.moveTo(cx, 0); ucCtx.lineTo(cx, h); ucCtx.stroke();
+  // circle
+  ucCtx.strokeStyle = 'rgba(0,240,255,0.6)';
+  ucCtx.lineWidth = 2;
+  ucCtx.beginPath(); ucCtx.arc(cx, cy, r, 0, Math.PI*2); ucCtx.stroke();
+  // angle
+  const rad = deg * Math.PI/180;
+  const x = cx + r*Math.cos(rad);
+  const y = cy - r*Math.sin(rad);
+  // arc
+  ucCtx.strokeStyle = 'rgba(255,0,229,0.8)';
+  ucCtx.beginPath(); ucCtx.arc(cx, cy, 40, 0, -rad, true); ucCtx.stroke();
+  // radius line
+  ucCtx.strokeStyle = '#fff';
+  ucCtx.lineWidth = 2;
+  ucCtx.beginPath(); ucCtx.moveTo(cx, cy); ucCtx.lineTo(x, y); ucCtx.stroke();
+  // sin line (vertical)
+  ucCtx.strokeStyle = '#00f0ff';
+  ucCtx.setLineDash([4,4]);
+  ucCtx.beginPath(); ucCtx.moveTo(x, cy); ucCtx.lineTo(x, y); ucCtx.stroke();
+  // cos line (horizontal)
+  ucCtx.strokeStyle = '#ff00e5';
+  ucCtx.beginPath(); ucCtx.moveTo(cx, y); ucCtx.lineTo(x, y); ucCtx.stroke();
+  ucCtx.setLineDash([]);
+  // point
+  ucCtx.fillStyle = '#b4ff00';
+  ucCtx.beginPath(); ucCtx.arc(x, y, 6, 0, Math.PI*2); ucCtx.fill();
+  // labels
+  ucCtx.font = '12px monospace';
+  ucCtx.fillStyle = '#00f0ff';
+  ucCtx.fillText('sin', x+8, (cy+y)/2);
+  ucCtx.fillStyle = '#ff00e5';
+  ucCtx.fillText('cos', (cx+x)/2 - 15, y-8);
+  ucCtx.fillStyle = '#b4ff00';
+  ucCtx.fillText(`(${Math.cos(rad).toFixed(2)}, ${Math.sin(rad).toFixed(2)})`, x+10, y-10);
+
+  document.getElementById('ucCos').textContent = Math.cos(rad).toFixed(3);
+  document.getElementById('ucSin').textContent = Math.sin(rad).toFixed(3);
+  document.getElementById('ucTan').textContent = Math.abs(Math.cos(rad)) < 0.001 ? '∞' : Math.tan(rad).toFixed(3);
+  document.getElementById('ucAngleVal').textContent = deg;
+}
+ucAngle.addEventListener('input', e => drawUnitCircle(+e.target.value));
+
+// ============ WAVE VISUALIZATION ============
+const waveCanvas = document.getElementById('waveCanvas');
+const wCtx = waveCanvas.getContext('2d');
+let animating = false, animPhase = 0;
+
+function drawWave() {
+  if (!waveCanvas) return;
+  const rect = waveCanvas.getBoundingClientRect();
+  const w = rect.width || 800;
+  const h = rect.height || 280;
+  const dpr = window.devicePixelRatio || 1;
+  waveCanvas.width = w * dpr;
+  waveCanvas.height = h * dpr;
+  wCtx.scale(dpr, dpr);
+  waveCanvas.style.width = w + 'px';
+  waveCanvas.style.height = h + 'px';
+  
+  wCtx.fillStyle = '#000';
+  wCtx.fillRect(0,0,w,h);
+  // grid
+  wCtx.strokeStyle = 'rgba(0,240,255,0.1)';
+  wCtx.lineWidth = 1;
+  for (let i = 0; i < 10; i++) {
+    const x = (w/10)*i;
+    wCtx.beginPath(); wCtx.moveTo(x,0); wCtx.lineTo(x,h); wCtx.stroke();
+  }
+  // axis
+  wCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+  wCtx.beginPath(); wCtx.moveTo(0, h/2); wCtx.lineTo(w, h/2); wCtx.stroke();
+
+  const func = document.getElementById('waveFunc').value;
+  const amp = +document.getElementById('amp').value;
+  const freq = +document.getElementById('freq').value;
+  const phase = +document.getElementById('phase').value * Math.PI/180 + animPhase;
+
+  wCtx.strokeStyle = '#00f0ff';
+  wCtx.lineWidth = 2.5;
+  wCtx.shadowColor = '#00f0ff';
+  wCtx.shadowBlur = 10;
+  wCtx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const x = (px/w) * 4 * Math.PI;
+    let y;
+    switch(func) {
+      case 'sin': y = amp * Math.sin(freq*x + phase); break;
+      case 'cos': y = amp * Math.cos(freq*x + phase); break;
+      case 'tan': y = Math.max(-3, Math.min(3, amp * Math.tan(freq*x + phase))); break;
+      case 'cot': { const t = Math.tan(freq*x + phase); y = Math.max(-3, Math.min(3, amp / (t||0.001))); break; }
+      case 'sec': { const c = Math.cos(freq*x + phase); y = Math.max(-3, Math.min(3, amp / (c||0.001))); break; }
+      case 'csc': { const s = Math.sin(freq*x + phase); y = Math.max(-3, Math.min(3, amp / (s||0.001))); break; }
+    }
+    const py = h/2 - (y/3) * (h/2) * 0.9;
+    if (px === 0) wCtx.moveTo(px, py); else wCtx.lineTo(px, py);
+  }
+  wCtx.stroke();
+  wCtx.shadowBlur = 0;
+
+  document.getElementById('eqDisplay').textContent =
+    `y = ${amp.toFixed(1)} · ${func}(${freq.toFixed(1)}x + ${document.getElementById('phase').value}°)`;
+}
+['waveFunc','amp','freq','phase'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    if (id === 'amp') document.getElementById('ampVal').textContent = (+e.target.value).toFixed(1);
+    if (id === 'freq') document.getElementById('freqVal').textContent = (+e.target.value).toFixed(1);
+    if (id === 'phase') document.getElementById('phaseVal').textContent = e.target.value;
+    if (!animating) drawWave();
+  });
+});
+document.getElementById('toggleAnim').addEventListener('click', (e) => {
+  animating = !animating;
+  e.target.textContent = animating ? '⏸ Pause' : '▶ Animasi';
+  if (animating) animateWave();
+});
+function animateWave() {
+  if (!animating) return;
+  animPhase += 0.05;
+  drawWave();
+  requestAnimationFrame(animateWave);
+}
+
+// ============ SUPERPOSITION ============
+const superCanvas = document.getElementById('superCanvas');
+const sCtx = superCanvas.getContext('2d');
+function drawSuper() {
+  if (!superCanvas) return;
+  const rect = superCanvas.getBoundingClientRect();
+  const w = rect.width || 800;
+  const h = rect.height || 280;
+  const dpr = window.devicePixelRatio || 1;
+  superCanvas.width = w * dpr;
+  superCanvas.height = h * dpr;
+  sCtx.scale(dpr, dpr);
+  superCanvas.style.width = w + 'px';
+  superCanvas.style.height = h + 'px';
+  
+  sCtx.fillStyle = '#000';
+  sCtx.fillRect(0,0,w,h);
+  const f1 = +document.getElementById('f1').value;
+  const f2 = +document.getElementById('f2').value;
+  // wave 1
+  sCtx.strokeStyle = 'rgba(0,240,255,0.4)';
+  sCtx.lineWidth = 1;
+  sCtx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const x = (px/w) * 4 * Math.PI;
+    const y = Math.sin(f1*x);
+    const py = h/2 - y * (h/4);
+    if (px === 0) sCtx.moveTo(px, py); else sCtx.lineTo(px, py);
+  }
+  sCtx.stroke();
+  // wave 2
+  sCtx.strokeStyle = 'rgba(255,0,229,0.4)';
+  sCtx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const x = (px/w) * 4 * Math.PI;
+    const y = Math.sin(f2*x);
+    const py = h/2 - y * (h/4);
+    if (px === 0) sCtx.moveTo(px, py); else sCtx.lineTo(px, py);
+  }
+  sCtx.stroke();
+  // sum
+  sCtx.strokeStyle = '#b4ff00';
+  sCtx.lineWidth = 2.5;
+  sCtx.shadowColor = '#b4ff00';
+  sCtx.shadowBlur = 8;
+  sCtx.beginPath();
+  for (let px = 0; px < w; px++) {
+    const x = (px/w) * 4 * Math.PI;
+    const y = Math.sin(f1*x) + Math.sin(f2*x);
+    const py = h/2 - (y/2) * (h/4);
+    if (px === 0) sCtx.moveTo(px, py); else sCtx.lineTo(px, py);
+  }
+  sCtx.stroke();
+  sCtx.shadowBlur = 0;
+  // axis
+  sCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+  sCtx.lineWidth = 1;
+  sCtx.beginPath(); sCtx.moveTo(0, h/2); sCtx.lineTo(w, h/2); sCtx.stroke();
+}
+['f1','f2'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    document.getElementById(id+'Val').textContent = (+e.target.value).toFixed(1);
+    drawSuper();
+  });
+});
+
+// ============ AUDIO CONTEXT ============
+let audioCtx = null;
+let soundOsc = null, soundGain = null, soundAnalyser = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ============ FREQUENCY SIMULATOR ============
+const soundFreq = document.getElementById('soundFreq');
+const soundVol = document.getElementById('soundVol');
+const freqDisplay = document.getElementById('freqDisplay');
+const freqNote = document.getElementById('freqNote');
+const freqMeter = document.getElementById('freqMeter');
+const soundWaveCanvas = document.getElementById('soundWaveCanvas');
+const swCtx = soundWaveCanvas.getContext('2d');
+
+function logScale(v) {
+  if (v <= 0) return 0;
+  const minLog = Math.log10(20);
+  const maxLog = Math.log10(20000);
+  const log = minLog + (v/1000) * (maxLog - minLog);
+  return Math.pow(10, log);
+}
+function invLogScale(f) {
+  if (f <= 20) return 0;
+  const minLog = Math.log10(20);
+  const maxLog = Math.log10(20000);
+  return ((Math.log10(f) - minLog) / (maxLog - minLog)) * 1000;
+}
+function freqToNote(f) {
+  if (f < 16) return 'Infrasound (di bawah pendengaran)';
+  if (f > 20000) return 'Ultrasound (di atas pendengaran)';
+  const notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const midi = 69 + 12 * Math.log2(f/440);
+  const n = Math.round(midi);
+  const octave = Math.floor(n/12) - 1;
+  const note = notes[n % 12];
+  const cents = Math.round((midi - n) * 100);
+  return `Nada: ${note}${octave} (${cents >= 0 ? '+' : ''}${cents} cents)`;
+}
+function updateFreqDisplay() {
+  const v = +soundFreq.value;
+  const f = logScale(v);
+  freqDisplay.textContent = f.toFixed(2) + ' Hz';
+  freqNote.textContent = freqToNote(f);
+  freqMeter.style.width = Math.min(100, (v/1000)*100) + '%';
+}
+soundFreq.addEventListener('input', () => {
+  updateFreqDisplay();
+  if (soundOsc) soundOsc.frequency.value = logScale(+soundFreq.value);
+});
+soundVol.addEventListener('input', e => {
+  document.getElementById('volVal').textContent = e.target.value;
+  if (soundGain) soundGain.gain.value = (+e.target.value/100) * 0.3;
+});
+function setFreq(f) {
+  soundFreq.value = invLogScale(f);
+  updateFreqDisplay();
+  if (soundOsc) soundOsc.frequency.value = f;
+}
+updateFreqDisplay();
+
+document.getElementById('playBtn').addEventListener('click', () => {
+  const ctx = ensureAudio();
+  if (soundOsc) { try { soundOsc.stop(); } catch(e){} }
+  soundOsc = ctx.createOscillator();
+  soundGain = ctx.createGain();
+  soundAnalyser = ctx.createAnalyser();
+  soundAnalyser.fftSize = 2048;
+  soundOsc.type = document.getElementById('waveType').value;
+  soundOsc.frequency.value = logScale(+soundFreq.value);
+  soundGain.gain.value = (+soundVol.value/100) * 0.3;
+  soundOsc.connect(soundGain);
+  soundGain.connect(soundAnalyser);
+  soundAnalyser.connect(ctx.destination);
+  soundOsc.start();
+  drawSoundWave();
+});
+document.getElementById('stopBtn').addEventListener('click', () => {
+  if (soundOsc) { try { soundOsc.stop(); } catch(e){} soundOsc = null; }
+});
+document.getElementById('waveType').addEventListener('change', e => {
+  if (soundOsc) soundOsc.type = e.target.value;
+});
+
+function drawSoundWave() {
+  if (!soundAnalyser) return;
+  const buf = new Uint8Array(soundAnalyser.fftSize);
+  function loop() {
+    if (!soundAnalyser) return;
+    const rect = soundWaveCanvas.getBoundingClientRect();
+    const w = rect.width || 800;
+    const h = rect.height || 280;
+    const dpr = window.devicePixelRatio || 1;
+    soundWaveCanvas.width = w * dpr;
+    soundWaveCanvas.height = h * dpr;
+    swCtx.scale(dpr, dpr);
+    soundWaveCanvas.style.width = w + 'px';
+    soundWaveCanvas.style.height = h + 'px';
+    
+    soundAnalyser.getByteTimeDomainData(buf);
+    swCtx.fillStyle = '#000';
+    swCtx.fillRect(0,0,w,h);
+    swCtx.strokeStyle = 'rgba(0,240,255,0.1)';
+    for (let i = 0; i <= 10; i++) {
+      swCtx.beginPath(); swCtx.moveTo(0, (h/10)*i); swCtx.lineTo(w, (h/10)*i); swCtx.stroke();
+    }
+    swCtx.strokeStyle = '#00f0ff';
+    swCtx.lineWidth = 2;
+    swCtx.shadowColor = '#00f0ff';
+    swCtx.shadowBlur = 8;
+    swCtx.beginPath();
+    for (let i = 0; i < buf.length; i++) {
+      const x = (i/buf.length) * w;
+      const y = (buf[i]/255) * h;
+      if (i === 0) swCtx.moveTo(x,y); else swCtx.lineTo(x,y);
+    }
+    swCtx.stroke();
+    swCtx.shadowBlur = 0;
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ============ PIANO ============
+const noteData = [
+  {note:'Do', key:'C', semitone:0, bind:'A'},
+  {note:'Re', key:'D', semitone:2, bind:'S'},
+  {note:'Mi', key:'E', semitone:4, bind:'D'},
+  {note:'Fa', key:'F', semitone:5, bind:'F'},
+  {note:'Sol', key:'G', semitone:7, bind:'G'},
+  {note:'La', key:'A', semitone:9, bind:'H'},
+  {note:'Si', key:'B', semitone:11, bind:'J'},
+  {note:"Do'", key:'C', semitone:12, bind:'K'}
+];
+const pianoKeys = document.getElementById('pianoKeys');
+const pianoWaveCanvas = document.getElementById('pianoWaveCanvas');
+const pwCtx = pianoWaveCanvas.getContext('2d');
+let pianoOsc = null, pianoGain = null, pianoAnalyser = null;
+
+function buildPiano() {
+  pianoKeys.innerHTML = '';
+  const octave = +document.getElementById('octaveSelect').value;
+  noteData.forEach((n, i) => {
+    const oct = i === 7 ? octave + 1 : octave;
+    const freq = 440 * Math.pow(2, (n.semitone - 9 + (oct - 4)*12)/12);
+    const key = document.createElement('div');
+    key.className = 'key';
+    key.innerHTML = `<span class="note">${n.note}</span><span class="freq">${freq.toFixed(1)} Hz</span><span style="font-size:0.7rem; color:#888; margin-top:2px;">[${n.bind}]</span>`;
+    key.dataset.freq = freq;
+    key.dataset.bind = n.bind;
+    key.addEventListener('mousedown', () => playPianoNote(freq, key));
+    key.addEventListener('touchstart', (e) => { e.preventDefault(); playPianoNote(freq, key); });
+    pianoKeys.appendChild(key);
+  });
+}
+function playPianoNote(freq, keyEl) {
+  const ctx = ensureAudio();
+  if (pianoOsc) { try { pianoOsc.stop(); } catch(e){} }
+  pianoOsc = ctx.createOscillator();
+  pianoGain = ctx.createGain();
+  pianoAnalyser = ctx.createAnalyser();
+  pianoAnalyser.fftSize = 2048;
+  pianoOsc.type = document.getElementById('pWave').value;
+  pianoOsc.frequency.value = freq;
+  const vol = (+document.getElementById('pVol').value/100) * 0.3;
+  pianoGain.gain.setValueAtTime(0, ctx.currentTime);
+  pianoGain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.02);
+  pianoGain.gain.linearRampToValueAtTime(vol*0.7, ctx.currentTime + 0.3);
+  pianoGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2);
+  pianoOsc.connect(pianoGain);
+  pianoGain.connect(pianoAnalyser);
+  pianoAnalyser.connect(ctx.destination);
+  pianoOsc.start();
+  pianoOsc.stop(ctx.currentTime + 2);
+  if (keyEl) {
+    keyEl.classList.add('active');
+    setTimeout(() => keyEl.classList.remove('active'), 300);
+  }
+  drawPianoWave();
+}
+document.getElementById('octaveSelect').addEventListener('change', buildPiano);
+document.getElementById('pVol').addEventListener('input', e => {
+  document.getElementById('pVolVal').textContent = e.target.value;
+});
+buildPiano();
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('piano').classList.contains('active')) {
+    const key = [...pianoKeys.children].find(k => k.dataset.bind === e.key.toUpperCase());
+    if (key && !e.repeat) {
+      playPianoNote(+key.dataset.freq, key);
+    }
+  }
+});
+
+function drawPianoWave() {
+  if (!pianoAnalyser) return;
+  const buf = new Uint8Array(pianoAnalyser.fftSize);
+  function loop() {
+    pianoAnalyser.getByteTimeDomainData(buf);
+    let max = 0;
+    for (let i = 0; i < buf.length; i++) max = Math.max(max, Math.abs(buf[i]-128));
+    if (max < 2) return;
+    const rect = pianoWaveCanvas.getBoundingClientRect();
+    const w = rect.width || 800;
+    const h = rect.height || 280;
+    const dpr = window.devicePixelRatio || 1;
+    pianoWaveCanvas.width = w * dpr;
+    pianoWaveCanvas.height = h * dpr;
+    pwCtx.scale(dpr, dpr);
+    pianoWaveCanvas.style.width = w + 'px';
+    pianoWaveCanvas.style.height = h + 'px';
+    
+    pwCtx.fillStyle = 'rgba(0,0,0,0.3)';
+    pwCtx.fillRect(0,0,w,h);
+    pwCtx.strokeStyle = '#ff00e5';
+    pwCtx.lineWidth = 2;
+    pwCtx.shadowColor = '#ff00e5';
+    pwCtx.shadowBlur = 10;
+    pwCtx.beginPath();
+    for (let i = 0; i < buf.length; i++) {
+      const x = (i/buf.length) * w;
+      const y = (buf[i]/255) * h;
+      if (i === 0) pwCtx.moveTo(x,y); else pwCtx.lineTo(x,y);
+    }
+    pwCtx.stroke();
+    pwCtx.shadowBlur = 0;
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ============ SPECTRUM ANALYZER ============
+const specWave = document.getElementById('specWave');
+const specFreq = document.getElementById('specFreq');
+const swvCtx = specWave.getContext('2d');
+const sfCtx = specFreq.getContext('2d');
+let micStream = null, micAnalyser = null, micSource = null;
+const levelMeter = document.getElementById('levelMeter');
+
+document.getElementById('micBtn').addEventListener('click', async () => {
+  try {
+    const ctx = ensureAudio();
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    micSource = ctx.createMediaStreamSource(micStream);
+    micAnalyser = ctx.createAnalyser();
+    micAnalyser.fftSize = 2048;
+    micSource.connect(micAnalyser);
+    drawSpectrum();
+  } catch(e) {
+    alert('Tidak bisa mengakses mikrofon: ' + e.message);
+  }
+});
+document.getElementById('micStop').addEventListener('click', () => {
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (micSource) { micSource.disconnect(); micSource = null; }
+  micAnalyser = null;
+});
+document.getElementById('demoBtn').addEventListener('click', () => {
+  const ctx = ensureAudio();
+  if (micAnalyser) { try { micSource.disconnect(); } catch(e){} }
+  const demoOsc1 = ctx.createOscillator();
+  const demoOsc2 = ctx.createOscillator();
+  const demoGain = ctx.createGain();
+  demoOsc1.frequency.value = 440;
+  demoOsc2.frequency.value = 880;
+  demoGain.gain.value = 0.1;
+  demoOsc1.connect(demoGain);
+  demoOsc2.connect(demoGain);
+  micAnalyser = ctx.createAnalyser();
+  micAnalyser.fftSize = 2048;
+  demoGain.connect(micAnalyser);
+  micAnalyser.connect(ctx.destination);
+  demoOsc1.start(); demoOsc2.start();
+  setTimeout(() => { try { demoOsc1.stop(); demoOsc2.stop(); } catch(e){} }, 5000);
+  drawSpectrum();
+});
+
+function drawSpectrum() {
+  if (!micAnalyser) return;
+  const timeData = new Uint8Array(micAnalyser.fftSize);
+  const freqData = new Uint8Array(micAnalyser.frequencyBinCount);
+  function loop() {
+    if (!micAnalyser) return;
+    micAnalyser.getByteTimeDomainData(timeData);
+    micAnalyser.getByteFrequencyData(freqData);
+    // waveform
+    const rect1 = specWave.getBoundingClientRect();
+    const w1 = rect1.width || 800;
+    const h1 = rect1.height || 280;
+    const dpr1 = window.devicePixelRatio || 1;
+    specWave.width = w1 * dpr1;
+    specWave.height = h1 * dpr1;
+    swvCtx.scale(dpr1, dpr1);
+    specWave.style.width = w1 + 'px';
+    specWave.style.height = h1 + 'px';
+    
+    swvCtx.fillStyle = '#000';
+    swvCtx.fillRect(0,0,w1,h1);
+    swvCtx.strokeStyle = '#00f0ff';
+    swvCtx.lineWidth = 2;
+    swvCtx.shadowColor = '#00f0ff';
+    swvCtx.shadowBlur = 6;
+    swvCtx.beginPath();
+    let maxAmp = 0;
+    for (let i = 0; i < timeData.length; i++) {
+      const x = (i/timeData.length) * w1;
+      const y = (timeData[i]/255) * h1;
+      maxAmp = Math.max(maxAmp, Math.abs(timeData[i]-128));
+      if (i === 0) swvCtx.moveTo(x,y); else swvCtx.lineTo(x,y);
+    }
+    swvCtx.stroke();
+    swvCtx.shadowBlur = 0;
+    levelMeter.style.width = Math.min(100, (maxAmp/128)*100) + '%';
+    // spectrum
+    const rect2 = specFreq.getBoundingClientRect();
+    const w2 = rect2.width || 800;
+    const h2 = rect2.height || 180;
+    const dpr2 = window.devicePixelRatio || 1;
+    specFreq.width = w2 * dpr2;
+    specFreq.height = h2 * dpr2;
+    sfCtx.scale(dpr2, dpr2);
+    specFreq.style.width = w2 + 'px';
+    specFreq.style.height = h2 + 'px';
+    
+    sfCtx.fillStyle = '#000';
+    sfCtx.fillRect(0,0,w2,h2);
+    const barW = w2 / freqData.length * 2.5;
+    const gradient = sfCtx.createLinearGradient(0,0,0,h2);
+    gradient.addColorStop(0, '#ff00e5');
+    gradient.addColorStop(0.5, '#00f0ff');
+    gradient.addColorStop(1, '#b4ff00');
+    sfCtx.fillStyle = gradient;
+    for (let i = 0; i < freqData.length/2.5; i++) {
+      const barH = (freqData[i]/255) * h2;
+      sfCtx.fillRect(i*barW, h2-barH, barW-1, barH);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ============ INIT ============
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    resizeAll();
+    drawUnitCircle(45);
+    drawWave();
+    drawSuper();
+  }, 100);
+});
+
+window.addEventListener('resize', () => {
+  resizeAll();
+  drawUnitCircle(+document.getElementById('ucAngle').value);
+  drawWave();
+  drawSuper();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>NAUFAL HACKER | Persatuan Hacker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+body { background: #000; color: #00ff00; overflow-x: hidden; min-height: 100vh; width: 100vw; }
+#matrix { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.login-overlay.hidden { display: none; }
+.login-box { background: rgba(0,20,0,0.9); border: 2px solid #00ff00; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 0 30px #00ff00; text-align: center; }
+.login-box h2 { color: #00ff00; margin-bottom: 20px; text-shadow: 0 0 15px #00ff00; }
+.auth-input { width: 100%; padding: 15px; background: #000; border: 1px solid #00ff00; color: #00ff00; font-size: 16px; margin: 10px 0; outline: none; }
+.auth-input:focus { box-shadow: 0 0 15px #00ff00; }
+.login-btn, .btn { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 30px; cursor: pointer; font-size: 14px; text-transform: uppercase; transition: all 0.3s; margin: 5px; }
+.login-btn:hover, .btn:hover { background: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+.error-msg { color: #ff0000; margin-top: 15px; display: none; }
+.auth-toggle { margin-top: 20px; font-size: 14px; }
+.auth-link { color: #00ff00; text-decoration: underline; cursor: pointer; }
+.auth-link:hover { color: #ffff00; }
+.navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); border-bottom: 2px solid #00ff00; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 0 20px #00ff00; }
+.logo { font-size: 24px; font-weight: bold; color: #00ff00; text-shadow: 0 0 10px #00ff00; letter-spacing: 3px; }
+.nav-menu { display: flex; gap: 15px; list-style: none; }
+.nav-menu li a { color: #00ff00; text-decoration: none; font-size: 14px; padding: 8px 12px; border: 1px solid transparent; transition: all 0.3s; text-transform: uppercase; }
+.nav-menu li a:hover, .nav-menu li a.active { border: 1px solid #00ff00; background: rgba(0,255,0,0.1); box-shadow: 0 0 15px #00ff00; }
+.hamburger { width: 35px; height: 30px; cursor: pointer; position: relative; z-index: 200; }
+.hamburger span { display: block; width: 100%; height: 3px; background: #00ff00; margin: 6px 0; transition: all 0.4s; }
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(8px, -8px); }
+.settings-panel { position: fixed; top: 70px; right: -350px; width: 320px; background: rgba(0,20,0,0.95); border: 2px solid #00ff00; padding: 25px; z-index: 150; transition: right 0.4s; box-shadow: 0 0 30px #00ff00; }
+.settings-panel.active { right: 20px; }
+.settings-panel h3 { color: #00ff00; margin-bottom: 20px; border-bottom: 1px solid #00ff00; padding-bottom: 10px; }
+.setting-item { margin: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+.setting-item label { color: #00ff00; font-size: 14px; }
+.setting-item input[type="range"] { width: 120px; accent-color: #00ff00; }
+.setting-item input[type="checkbox"] { accent-color: #00ff00; }
+.main-content { position: relative; z-index: 10; padding-top: 100px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+.page { display: none; width: 100%; padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
+.page.active { display: block; animation: fadeIn 0.5s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.glitch { font-size: 40px; font-weight: bold; color: #00ff00; position: relative; text-shadow: 0 0 20px #00ff00; animation: glitch 2s infinite; letter-spacing: 3px; margin: 20px 0; }
+.glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; }
+.glitch::before { animation: glitch-top 1s infinite; color: #ff00ff; clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); }
+.glitch::after { animation: glitch-bottom 1.5s infinite; color: #00ffff; clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%); }
+@keyframes glitch { 0%,100%{transform:translate(0)} 20%{transform:translate(-2px,2px)} 40%{transform:translate(-2px,-2px)} 60%{transform:translate(2px,2px)} 80%{transform:translate(2px,-2px)} }
+@keyframes glitch-top { 0%,100%{transform:translate(0)} 20%{transform:translate(-3px,-2px)} 40%{transform:translate(3px,2px)} }
+@keyframes glitch-bottom { 0%,100%{transform:translate(0)} 20%{transform:translate(3px,2px)} 40%{transform:translate(-3px,-2px)} }
+.subtitle { font-size: 18px; color: #00ff00; opacity: 0.8; letter-spacing: 2px; margin-bottom: 30px; }
+.terminal { background: rgba(0,0,0,0.8); border: 1px solid #00ff00; padding: 20px; margin: 20px auto; max-width: 800px; text-align: left; box-shadow: 0 0 20px #00ff00; }
+.terminal-header { color: #00ff00; border-bottom: 1px solid #00ff00; padding-bottom: 10px; margin-bottom: 15px; }
+.terminal-line { margin: 5px 0; color: #00ff00; }
+.prompt { color: #ff0000; margin-right: 10px; }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin: 30px auto; max-width: 1000px; }
+.tool-card { background: rgba(0,20,0,0.8); border: 1px solid #00ff00; padding: 25px; cursor: pointer; transition: all 0.3s; text-align: left; }
+.tool-card:hover { background: rgba(0,255,0,0.1); box-shadow: 0 0 25px #00ff00; transform: translateY(-5px); }
+.tool-card h3 { color: #00ff00; margin-bottom: 10px; text-shadow: 0 0 10px #00ff00; }
+.tool-card p { font-size: 14px; opacity: 0.9; }
+h2 { color: #00ff00; text-shadow: 0 0 15px #00ff00; margin: 20px 0; letter-spacing: 3px; text-align: center; }
+#satellite-container { position: relative; width: 100%; max-width: 900px; height: 500px; margin: 30px auto; border: 2px solid #00ff00; box-shadow: 0 0 30px #00ff00; background: radial-gradient(circle, #001a00 0%, #000 100%); overflow: hidden; cursor: grab; }
+#satellite-container:active { cursor: grabbing; }
+.satellite-info { position: absolute; top: 15px; left: 15px; background: rgba(0,20,0,0.95); border: 1px solid #00ff00; padding: 15px; font-size: 12px; color: #00ff00; z-index: 10; min-width: 200px; }
+.satellite-info h4 { margin-bottom: 10px; border-bottom: 1px solid #00ff00; padding-bottom: 5px; }
+.satellite-info .stat { margin: 4px 0; display: flex; justify-content: space-between; }
+.satellite-info .stat span:last-child { color: #ffff00; font-weight: bold; }
+.scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00ff00, transparent); animation: scan 3s linear infinite; pointer-events: none; }
+@keyframes scan { 0%{top:0;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:100%;opacity:0} }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: rgba(0,15,0,0.95); border: 2px solid #00ff00; padding: 30px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 40px #00ff00; position: relative; }
+.modal-close { position: absolute; top: 10px; right: 15px; font-size: 24px; color: #ff0000; cursor: pointer; }
+.modal-title { color: #00ff00; font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid #00ff00; padding-bottom: 10px; }
+.modal-body { color: #00ff00; font-size: 14px; line-height: 1.6; }
+.modal-body input, .modal-body textarea { width: 100%; padding: 10px; background: #000; border: 1px solid #00ff00; color: #00ff00; margin: 10px 0; }
+.modal-body textarea { height: 100px; resize: vertical; }
+.ascii-art { color: #00ff00; font-size: 8px; line-height: 1; white-space: pre; margin: 20px 0; text-align: center; }
+@media (max-width: 768px) { .nav-menu { display: none; } .glitch { font-size: 24px; } #satellite-container { height: 350px; } }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<!-- AUTH SYSTEM -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <div style="font-size:60px; margin-bottom:20px;">☠</div>
+        <h2 id="authTitle">LOGIN SYSTEM</h2>
+        <div id="loginForm">
+            <input type="text" class="auth-input" id="loginUser" placeholder="Username">
+            <input type="password" class="auth-input" id="loginPass" placeholder="Password">
+            <br><br>
+            <button class="login-btn" onclick="handleLogin()">MASUK SISTEM</button>
+            <div class="auth-toggle">Belum punya akun? <span class="auth-link" onclick="toggleAuth('register')">Daftar di sini</span></div>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <input type="text" class="auth-input" id="regUser" placeholder="Buat Username">
+            <input type="password" class="auth-input" id="regPass" placeholder="Buat Password">
+            <input type="password" class="auth-input" id="regPassConfirm" placeholder="Konfirmasi Password">
+            <br><br>
+            <button class="login-btn" onclick="handleRegister()">DAFTAR AKUN</button>
+            <div class="auth-toggle">Sudah punya akun? <span class="auth-link" onclick="toggleAuth('login')">Login di sini</span></div>
+        </div>
+        <div class="error-msg" id="authError"></div>
+        <p style="margin-top:20px; font-size:11px; opacity:0.5;">Default: naufal / 123098zxcMLP</p>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">☠ NAUFAL_H4CK3R</div>
+    <ul class="nav-menu">
+        <li><a href="#" class="nav-link active" data-page="home">HOME</a></li>
+        <li><a href="#" class="nav-link" data-page="tools">TOOLS</a></li>
+        <li><a href="#" class="nav-link" data-page="exploits">EXPLOITS</a></li>
+        <li><a href="#" class="nav-link" data-page="satellite">SATELLITE</a></li>
+        <li><a href="#" class="nav-link" data-page="forum">FORUM</a></li>
+        <li><a href="#" class="nav-link" data-page="tutorials">TUTORIAL</a></li>
+        <li><a href="#" class="nav-link" data-page="about">ABOUT</a></li>
+    </ul>
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+    <h3>⚙ PENGATURAN</h3>
+    <div style="color:#ffff00; font-size:12px; margin-bottom:15px; border:1px dashed #ffff00; padding:8px;" id="currentUserDisplay">User: Guest</div>
+    <div class="setting-item"><label>Intensitas Matrix</label><input type="range" id="matrixIntensity" min="0.1" max="1" step="0.1" value="0.4"></div>
+    <div class="setting-item"><label>Kecepatan Efek</label><input type="range" id="speedControl" min="20" max="100" step="10" value="50"></div>
+    <div class="setting-item"><label>Suara Ketikan</label><input type="checkbox" id="soundToggle" checked></div>
+    <div class="setting-item"><label>Suara Tombol</label><input type="checkbox" id="buttonSoundToggle" checked></div>
+    <button class="btn" onclick="handleLogout()" style="width:100%; margin-top:20px; border-color:#ff0000; color:#ff0000;">LOGOUT</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="home">
+        <pre class="ascii-art">
+    ██████╗  █████╗ ██╗   ██╗███████╗ ██████╗  █████╗ ██╗     
+    ██╔══██╗██╔══██╗██║   ██║██╔════╝██╔════╝██╔══██╗██║     
+    ██║  ██║███████║██║   ██║███████╗██║     ███████║██║     
+    ██║  ██║██╔══██║██╗ ██╔╝════██║██║     ██══██║██║     
+    ██████╔╝██║  ██║ ╚████╝ ███████║╚██████╗██║  ██║███████╗
+    ╚═════╝ ╚═╝  ╚═╝  ╚═══╝  ╚══════╝ ╚═════╝═╝  ╚═╝╚══════╝
+        </pre>
+        <h1 class="glitch" data-text="SELAMAT DATANG DI WEBSITE PERSATUAN HACKER">SELAMAT DATANG DI WEBSITE PERSATUAN HACKER</h1>
+        <p class="subtitle" id="welcomeUser">[ SYSTEM ACCESS GRANTED ]</p>
+        <div class="terminal">
+            <div class="terminal-header">root@naufal:~# whoami</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Initializing secure connection...</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Encryption: AES-256 [ACTIVE]</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Status: <span style="color:#00ff00">ONLINE</span></div>
+        </div>
+        <button class="btn" onclick="showModal('SYSTEM ACCESS', '<div class=\'terminal\'><div class=\'terminal-line\'>Verifying biometric data... OK</div><div class=\'terminal-line\'>Welcome back!</div></div>')">MASUK SISTEM</button>
+        <button class="btn" onclick="simulateScan()">SCAN NETWORK</button>
+    </div>
+
+    <!-- TOOLS PAGE -->
+    <div class="page" id="tools">
+        <h2>⚡ HACKER TOOLS</h2>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="runTool('Password Cracker', 'Initializing hashcat...\nLoading wordlist: rockyou.txt\n[====================] 100%\nPassword found: password')">
+                <h3>🔓 Password Cracker</h3>
+                <p>Alat untuk menguji kekuatan password dengan brute force attack</p>
+            </div>
+            <div class="tool-card" onclick="runTool('Network Scanner', 'Starting Nmap 7.94...\nScanning 192.168.1.0/24\nPORT   STATE  SERVICE\n22/tcp open   ssh\n80/tcp open   http')">
+                <h3>🌐 Network Scanner</h3>
+                <p>Scan jaringan dan port terbuka di network target</p>
+            </div>
+            <div class="tool-card" onclick="runTool('IP Tracker', 'Tracing route...\nHop 1: 192.168.1.1 (1ms)\nHop 2: 10.0.0.1 (5ms)\nLocation: Jakarta, ID')">
+                <h3>🕵️ IP Tracker</h3>
+                <p>Lacak lokasi berdasarkan IP address</p>
+            </div>
+            <div class="tool-card" onclick="runTool('Hash Generator', 'Input: NaufalHacker2026\nMD5: 8a3d4e5f6g7h8i9j\nSHA-256: a1b2c3d4e5f6g7h8')">
+                <h3>🔐 Hash Generator</h3>
+                <p>Generate MD5, SHA-1, SHA-256 hash</p>
+            </div>
+            <div class="tool-card" onclick="runTool('WiFi Analyzer', 'Scanning wireless networks...\nSSID: TelkomWiFi_123 | Signal: -45dBm\nSSID: IndiHome_456 | Signal: -60dBm')">
+                <h3>📡 WiFi Analyzer</h3>
+                <p>Analisis jaringan WiFi sekitar</p>
+            </div>
+            <div class="tool-card" onclick="runTool('Phishing Detector', 'Analyzing URL...\nSSL certificate: INVALID\nDomain age: 2 days\nResult:  HIGH RISK')">
+                <h3>🛡️ Phishing Detector</h3>
+                <p>Deteksi website phishing</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPLOITS PAGE -->
+    <div class="page" id="exploits">
+        <h2>💀 EXPLOITS DATABASE</h2>
+        <div class="terminal">
+            <div class="terminal-header">root@naufal:~# ls -la /exploits/</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>CVE-2024-XXXX  SQL Injection Pack</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>CVE-2024-YYYY  XSS Exploit Kit</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>CVE-2024-ZZZZ  Buffer Overflow</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Total: 1337 exploits loaded</div>
+        </div>
+        <button class="btn" onclick="showModal('EXPLOIT DATABASE', '<div class=\'terminal\'><div class=\'terminal-line\'>CVE-2024-1001 | Critical | RCE</div><div class=\'terminal-line\'>CVE-2024-1002 | High | SQL Injection</div><div class=\'terminal-line\'>CVE-2024-1003 | Medium | XSS</div></div>')">BROWSE DATABASE</button>
+        <button class="btn" onclick="showModal('SUBMIT EXPLOIT', '<div class=\'modal-body\'><input type=\'text\' placeholder=\'CVE-ID\'><input type=\'text\' placeholder=\'Target Software\'><textarea placeholder=\'Deskripsi exploit...\'></textarea><br><button class=\'btn\' onclick=\'closeModal()\'>SUBMIT</button></div>')">SUBMIT EXPLOIT</button>
+    </div>
+
+    <!-- SATELLITE PAGE -->
+    <div class="page" id="satellite">
+        <h2>🛰️ SATELLITE TRACKER</h2>
+        <p style="text-align:center; margin-bottom:20px;">Drag untuk memutar bumi • Scroll untuk zoom</p>
+        <div id="satellite-container">
+            <div class="scan-line"></div>
+            <div class="satellite-info">
+                <h4>📡 SATELLITE DATA</h4>
+                <div class="stat"><span>Terdeteksi:</span><span id="satCount">0</span></div>
+                <div class="stat"><span>Status:</span><span style="color:#00ff00">TRACKING</span></div>
+                <div class="stat"><span>Orbit:</span><span id="orbitCount">0</span></div>
+                <div class="stat"><span>Kecepatan:</span><span id="satSpeed">0 km/s</span></div>
+                <div class="stat"><span>Altitude:</span><span id="satAlt">0 km</span></div>
+            </div>
+        </div>
+        <div style="text-align:center;">
+            <button class="btn" onclick="rescanSatellites()">🔄 RE-SCAN SATELLITES</button>
+        </div>
+    </div>
+
+    <!-- FORUM PAGE -->
+    <div class="page" id="forum">
+        <h2>💬 FORUM DISKUSI</h2>
+        <div class="terminal" id="forumList">
+            <div class="terminal-header">Topik Terbaru</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>[<span style="color:#ff0000">HOT</span>] Cara bypass firewall terbaru - by ghost_01</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>[<span style="color:#ffff00">NEW</span>] Tutorial reverse engineering APK - by n3o</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>[DISKUSI] Linux distro terbaik untuk hacker - by r00t</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>[HELP] Masalah dengan Metasploit - by anon_x</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>[SHARE] Tools OSINT terbaru 2026 - by shadow</div>
+        </div>
+        <div style="text-align:center;">
+            <button class="btn" onclick="showModal('BUAT TOPIK BARU', '<div class=\'modal-body\'><input type=\'text\' id=\'newTopicTitle\' placeholder=\'Judul Topik\'><textarea id=\'newTopicContent\' placeholder=\'Isi diskusi...\'></textarea><br><button class=\'btn\' onclick=\'postTopic()\'>POST TOPIK</button></div>')">BUAT TOPIK BARU</button>
+        </div>
+    </div>
+
+    <!-- TUTORIALS PAGE -->
+    <div class="page" id="tutorials">
+        <h2>📚 TUTORIAL</h2>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="showModal('Tutorial: Linux Dasar', '<div class=\'terminal\'><div class=\'terminal-line\'>$ ls -la (List files)</div><div class=\'terminal-line\'>$ cd /path (Change directory)</div><div class=\'terminal-line\'>$ grep -r "text" . (Search)</div><div class=\'terminal-line\'>$ chmod 755 file (Permissions)</div></div>')">
+                <h3>🐧 Linux Dasar</h3>
+                <p>Belajar command line Linux untuk hacker pemula</p>
+            </div>
+            <div class="tool-card" onclick="showModal('Tutorial: Web Hacking', '<div class=\'terminal\'><div class=\'terminal-line\'>1. SQL Injection: \' OR 1=1 --</div><div class=\'terminal-line\'>2. XSS: &lt;script&gt;alert(1)&lt;/script&gt;</div><div class=\'terminal-line\'>3. CSRF: Token manipulation</div></div>')">
+                <h3>🌐 Web Hacking</h3>
+                <p>SQL Injection, XSS, CSRF dan teknik lainnya</p>
+            </div>
+            <div class="tool-card" onclick="showModal('Tutorial: Cryptography', '<div class=\'terminal\'><div class=\'terminal-line\'>Symmetric: AES, DES</div><div class=\'terminal-line\'>Asymmetric: RSA, ECC</div><div class=\'terminal-line\'>Hashing: MD5, SHA</div></div>')">
+                <h3>🔐 Cryptography</h3>
+                <p>Enkripsi, dekripsi, dan teknik kriptografi</p>
+            </div>
+            <div class="tool-card" onclick="showModal('Tutorial: Mobile Hacking', '<div class=\'terminal\'><div class=\'terminal-line\'>Tools: ADB, Frida</div><div class=\'terminal-line\'>Decompile: apktool d app.apk</div><div class=\'terminal-line\'>Analyze: jadx-gui</div></div>')">
+                <h3>📱 Mobile Hacking</h3>
+                <p>Pentesting aplikasi Android dan iOS</p>
+            </div>
+            <div class="tool-card" onclick="showModal('Tutorial: Social Engineering', '<div class=\'terminal\'><div class=\'terminal-line\'>1. Phishing (Email/SMS)</div><div class=\'terminal-line\'>2. Pretexting (Skenario)</div><div class=\'terminal-line\'>3. Baiting (USB drop)</div></div>')">
+                <h3>️ Social Engineering</h3>
+                <p>Teknik manipulasi psikologis</p>
+            </div>
+            <div class="tool-card" onclick="showModal('Tutorial: Ethical Hacking', '<div class=\'terminal\'><div class=\'terminal-line\'>1. Minta izin tertulis</div><div class=\'terminal-line\'>2. Patuhi scope</div><div class=\'terminal-line\'>3. Report vulnerability</div></div>')">
+                <h3>🛡️ Ethical Hacking</h3>
+                <p>Menjadi hacker yang bertanggung jawab</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT PAGE -->
+    <div class="page" id="about">
+        <h2>👤 ABOUT NAUFAL</h2>
+        <pre class="ascii-art">
+     .-""""-.
+    /        \
+   |  O    O  |
+   |    __    |
+    \  \__/  /
+     '------'
+        </pre>
+        <div class="terminal">
+            <div class="terminal-header">root@naufal:~# cat about.txt</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Nama: Naufal</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Alias: N4UF4L_H4CK3R</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Status: Active</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Spesialisasi: Web Security, Network Pentesting</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Motto: "Hack the planet, but ethically"</div>
+            <div class="terminal-line"><span class="prompt">&gt;</span>Skills: ██████████ 100%</div>
+        </div>
+        <button class="btn" onclick="showModal('HUBUNGI SAYA', '<div class=\'modal-body\'><input type=\'text\' placeholder=\'Nama Samaran\'><input type=\'email\' placeholder=\'Email\'><textarea placeholder=\'Pesan...\'></textarea><br><button class=\'btn\' onclick=\'closeModal()\'>KIRIM PESAN</button></div>')">HUBUNGI SAYA</button>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">✖</span>
+        <h3 class="modal-title" id="modalTitle">TITLE</h3>
+        <div class="modal-body" id="modalBody">Content</div>
+    </div>
+</div>
+
+<script>
+// ===== AUDIO SYSTEM =====
+let audioContext = null;
+let masterVolume = 0.3;
+let typingSoundEnabled = true;
+let buttonSoundEnabled = true;
+
+function initAudio() {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
+}
+
+function playTypingSound() {
+    if (!typingSoundEnabled || !audioContext) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.frequency.value = 800 + Math.random() * 400;
+    osc.type = 'square';
+    gain.gain.setValueAtTime(masterVolume * 0.3, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+    osc.start(audioContext.currentTime);
+    osc.stop(audioContext.currentTime + 0.05);
+}
+
+function playButtonSound() {
+    if (!buttonSoundEnabled || !audioContext) return;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.frequency.value = 600;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(masterVolume * 0.5, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    osc.start(audioContext.currentTime);
+    osc.stop(audioContext.currentTime + 0.1);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('button, .btn, .tool-card').forEach(btn => {
+        btn.addEventListener('click', () => { initAudio(); playButtonSound(); });
+    });
+    document.querySelectorAll('input, textarea').forEach(input => {
+        input.addEventListener('keypress', () => { initAudio(); playTypingSound(); });
+    });
+});
+
+// ===== AUTH SYSTEM =====
+function getUsers() { return JSON.parse(localStorage.getItem('naufal_users')) || []; }
+function saveUsers(users) { localStorage.setItem('naufal_users', JSON.stringify(users)); }
+
+if (getUsers().length === 0) {
+    saveUsers([{ username: 'naufal', password: '123098zxcMLP' }]);
+}
+
+let currentUser = null;
+
+function toggleAuth(mode) {
+    document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+    document.getElementById('authTitle').textContent = mode === 'login' ? 'LOGIN SYSTEM' : 'REGISTER';
+    document.getElementById('authError').style.display = 'none';
+}
+
+function handleRegister() {
+    const user = document.getElementById('regUser').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const passConf = document.getElementById('regPassConfirm').value;
+    const err = document.getElementById('authError');
+
+    if (!user || !pass) { err.textContent = "Username dan password wajib!"; err.style.display = 'block'; return; }
+    if (pass !== passConf) { err.textContent = "Password tidak cocok!"; err.style.display = 'block'; return; }
+    
+    const users = getUsers();
+    if (users.find(u => u.username === user)) { err.textContent = "Username sudah ada!"; err.style.display = 'block'; return; }
+    
+    users.push({ username: user, password: pass });
+    saveUsers(users);
+    err.style.color = '#00ff00';
+    err.textContent = "Pendaftaran berhasil! Silakan login.";
+    err.style.display = 'block';
+    setTimeout(() => toggleAuth('login'), 2000);
+}
+
+function handleLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const err = document.getElementById('authError');
+    
+    const users = getUsers();
+    const found = users.find(u => u.username === user && u.password === pass);
+    
+    if (found) {
+        currentUser = user;
+        localStorage.setItem('naufal_current_user', user);
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('currentUserDisplay').textContent = `User: ${user}`;
+        document.getElementById('welcomeUser').textContent = `[ WELCOME BACK, ${user.toUpperCase()} ]`;
+    } else {
+        err.style.color = '#ff0000';
+        err.textContent = "Username atau password salah!";
+        err.style.display = 'block';
+    }
+}
+
+function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('naufal_current_user');
+    document.getElementById('loginOverlay').classList.remove('hidden');
+    location.reload();
+}
+
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem('naufal_current_user');
+    if (saved && getUsers().find(u => u.username === saved)) {
+        currentUser = saved;
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('currentUserDisplay').textContent = `User: ${saved}`;
+        document.getElementById('welcomeUser').textContent = `[ WELCOME BACK, ${saved.toUpperCase()} ]`;
+    }
+});
+
+// ===== NAVIGATION =====
+const hamburger = document.getElementById('hamburger');
+const settingsPanel = document.getElementById('settingsPanel');
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    settingsPanel.classList.toggle('active');
+});
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(link.dataset.page).classList.add('active');
+        
+        if (link.dataset.page === 'satellite') {
+            setTimeout(initSatelliteScene, 100);
+        }
+    });
+});
+
+// ===== MODAL =====
+function showModal(title, content) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = content;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function runTool(name, output) {
+    const lines = output.split('\n').map(l => `<div class='terminal-line'><span class='prompt'>&gt;</span>${l}</div>`).join('');
+    showModal(name, `<div class='terminal'>${lines}</div>`);
+}
+
+function simulateScan() {
+    showModal('NETWORK SCAN', "<div class='terminal' id='scanTerm'><div class='terminal-line'><span class='prompt'>&gt;</span>Scanning 192.168.1.0/24...</div></div>");
+    let i = 0;
+    const ips = ['192.168.1.1', '192.168.1.15', '192.168.1.100'];
+    const interval = setInterval(() => {
+        if (i >= ips.length) { clearInterval(interval); return; }
+        document.getElementById('scanTerm').innerHTML += `<div class='terminal-line'><span class='prompt'>&gt;</span>${ips[i]} is UP</div>`;
+        i++;
+    }, 800);
+}
+
+function postTopic() {
+    const title = document.getElementById('newTopicTitle').value;
+    if (title) {
+        const forum = document.getElementById('forumList');
+        const newLine = document.createElement('div');
+        newLine.className = 'terminal-line';
+        newLine.innerHTML = `<span class='prompt'>&gt;</span>[NEW] ${title} - by ${currentUser || 'anon'}`;
+        forum.appendChild(newLine);
+        closeModal();
+    }
+}
+
+// ===== MATRIX =====
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars = 'アイウエオ0123456789ABCDEF';
+const charArray = chars.split('');
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px monospace';
+    
+    for (let i = 0; i < drops.length; i++) {
+        ctx.fillText(charArray[Math.floor(Math.random() * charArray.length)], i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 50);
+
+document.getElementById('matrixIntensity').addEventListener('input', (e) => {
+    canvas.style.opacity = e.target.value;
+});
+document.getElementById('speedControl').addEventListener('input', (e) => {
+    // Speed control would need interval adjustment
+});
+
+// ===== SATELLITE 3D =====
+let satelliteScene, satelliteCamera, satelliteRenderer, satellites = [], orbitLines = [];
+let isDragging = false, prevMouse = { x: 0, y: 0 };
+let rotX = 0, rotY = 0, targetRotX = 0, targetRotY = 0;
+let camDist = 3.5, satInit = false;
+
+function createEarthTexture() {
+    const size = 512;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size/2;
+    const cx = c.getContext('2d');
+    cx.fillStyle = 'rgba(0,30,0,0.4)';
+    cx.fillRect(0, 0, size, size/2);
+    cx.fillStyle = 'rgba(0,255,0,0.7)';
+    
+    // Simplified continents
+    const continents = [
+        [[60,80],[120,50],[180,70],[160,120],[100,130],[80,110]],
+        [[130,170],[170,170],[180,230],[150,260],[130,250],[120,200]],
+        [[440,70],[480,68],[490,85],[470,90],[440,88]],
+        [[440,110],[490,110],[500,160],[490,220],[450,235],[435,180]],
+        [[520,60],[600,50],[700,60],[750,85],[720,110],[640,110],[560,100]],
+        [[780,180],[850,180],[860,215],[840,225],[810,228],[785,220]]
+    ];
+    
+    continents.forEach(pts => {
+        cx.beginPath();
+        cx.moveTo(pts[0][0], pts[0][1]);
+        pts.forEach(([x,y]) => cx.lineTo(x,y));
+        cx.closePath();
+        cx.fill();
+    });
+    
+    return new THREE.CanvasTexture(c);
+}
+
+function initSatelliteScene() {
+    if (satInit) return;
+    satInit = true;
+    
+    const container = document.getElementById('satellite-container');
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    satelliteScene = new THREE.Scene();
+    satelliteCamera = new THREE.PerspectiveCamera(60, width/height, 0.1, 1000);
+    satelliteCamera.position.z = camDist;
+    
+    satelliteRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    satelliteRenderer.setSize(width, height);
+    container.insertBefore(satelliteRenderer.domElement, container.firstChild);
+    
+    // Earth
+    const earthGroup = new THREE.Group();
+    const earthGeo = new THREE.SphereGeometry(1, 64, 64);
+    const earthMat = new THREE.MeshPhongMaterial({
+        map: createEarthTexture(),
+        transparent: true,
+        opacity: 0.9,
+        emissive: 0x003300,
+        emissiveIntensity: 0.4
+    });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    earthGroup.add(earth);
+    
+    // Wireframe
+    const wireGeo = new THREE.SphereGeometry(1.02, 32, 32);
+    const wireMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, transparent: true, opacity: 0.15 });
+    earthGroup.add(new THREE.Mesh(wireGeo, wireMat));
+    
+    satelliteScene.add(earthGroup);
+    satelliteScene.add(new THREE.AmbientLight(0x00ff00, 0.5));
+    const dl = new THREE.DirectionalLight(0x00ff00, 1);
+    dl.position.set(5, 3, 5);
+    satelliteScene.add(dl);
+    
+    // Satellites
+    const satData = [
+        { orbit: 1.5, speed: 0.0008, inc: 0.3, color: 0x00ff00 },
+        { orbit: 1.7, speed: 0.0006, inc: 0.8, color: 0x00ffff },
+        { orbit: 1.9, speed: 0.0005, inc: 1.2, color: 0xffff00 },
+        { orbit: 2.1, speed: 0.0004, inc: 0.5, color: 0xff00ff }
+    ];
+    
+    satData.forEach((d, idx) => {
+        // Orbit line
+        const curve = new THREE.EllipseCurve(0, 0, d.orbit, d.orbit, 0, 2*Math.PI, false, 0);
+        const points = curve.getPoints(100);
+        const geom = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, 0, p.y)));
+        const mat = new THREE.LineBasicMaterial({ color: d.color, transparent: true, opacity: 0.3 });
+        const orbit = new THREE.Line(geom, mat);
+        orbit.rotation.x = d.inc;
+        orbit.rotation.z = idx * 0.5;
+        satelliteScene.add(orbit);
+        orbitLines.push(orbit);
+        
+        // Satellite
+        const satGeo = new THREE.SphereGeometry(0.04, 16, 16);
+        const satMat = new THREE.MeshBasicMaterial({ color: d.color });
+        const sat = new THREE.Mesh(satGeo, satMat);
+        sat.userData = { orbit: d.orbit, speed: d.speed, inc: d.inc, angle: idx, zRot: idx * 0.5 };
+        satelliteScene.add(sat);
+        satellites.push(sat);
+    });
+    
+    document.getElementById('satCount').textContent = satellites.length;
+    document.getElementById('orbitCount').textContent = orbitLines.length;
+    
+    // Mouse controls
+    const cvs = satelliteRenderer.domElement;
+    cvs.addEventListener('mousedown', e => { isDragging = true; prevMouse = { x: e.clientX, y: e.clientY }; });
+    cvs.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        targetRotY += (e.clientX - prevMouse.x) * 0.01;
+        targetRotX += (e.clientY - prevMouse.y) * 0.01;
+        prevMouse = { x: e.clientX, y: e.clientY };
+    });
+    cvs.addEventListener('mouseup', () => isDragging = false);
+    cvs.addEventListener('mouseleave', () => isDragging = false);
+    cvs.addEventListener('wheel', e => {
+        e.preventDefault();
+        camDist += e.deltaY * 0.001;
+        camDist = Math.max(2, Math.min(6, camDist));
+    });
+    
+    // Animation
+    function animate() {
+        requestAnimationFrame(animate);
+        rotX += (targetRotX - rotX) * 0.1;
+        rotY += (targetRotY - rotY) * 0.1;
+        earthGroup.rotation.x = rotX;
+        earthGroup.rotation.y = rotY;
+        if (!isDragging) targetRotY += 0.001;
+        
+        satellites.forEach(sat => {
+            const d = sat.userData;
+            d.angle += d.speed;
+            const x = Math.cos(d.angle) * d.orbit;
+            const z = Math.sin(d.angle) * d.orbit;
+            const y = Math.sin(d.angle * 2 + d.inc) * 0.3;
+            const cosZ = Math.cos(d.zRot);
+            const sinZ = Math.sin(d.zRot);
+            sat.position.set(x*cosZ - z*sinZ, y, x*sinZ + z*cosZ);
+        });
+        
+        // Update stats
+        if (Math.random() < 0.05) {
+            document.getElementById('satSpeed').textContent = (7.5 + Math.random()).toFixed(2) + ' km/s';
+            document.getElementById('satAlt').textContent = Math.floor(350 + Math.random() * 50) + ' km';
+        }
+        
+        satelliteCamera.position.z = camDist;
+        satelliteRenderer.render(satelliteScene, satelliteCamera);
+    }
+    animate();
+}
+
+function rescanSatellites() {
+    alert(`Scanning... ${satellites.length} satellites detected in orbit.`);
+}
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
